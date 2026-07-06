@@ -1,0 +1,1947 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TUA Operaciones</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --bg:#f2f1ee;--sur:#fff;--sur2:#f8f7f5;--bor:#e4e1db;--bor2:#ccc8c2;
+  --txt:#1a1a1a;--txt2:#5a5a5a;--txt3:#9a9590;
+  --rojo:#C8102E;--rojo-d:#a00d24;--rojo-s:#fdf0f2;--rojo-b:#f5cdd3;
+  --vc:#C8102E;--vs:#fdf0f2;--vb:#f5cdd3;
+  --ac:#d4580a;--as:#fef0e6;--ab:#f9cfa8;
+  --mc:#b07d0a;--ms:#fef8e6;--mb:#f5dfa0;
+  --bc:#1a7a4a;--bs:#edf7f2;--bb:#9fd4b8;
+  --ab2:#1a5fa8;--as2:#eaf1fb;--ab3:#b5d0f0;
+  --gc:#7a3db5;--gs:#f3eefb;--gb:#d4b8f0;
+  --f:'Segoe UI',system-ui,-apple-system,sans-serif;
+  --r:10px;--r2:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--f);background:var(--bg);color:var(--txt);min-height:100vh;min-height:100dvh;}
+
+/* LOGIN */
+#login{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:var(--txt);padding:1.5rem;}
+.login-wrap{width:100%;max-width:390px;}
+.login-logo{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:8px;}
+.login-tit{font-size:26px;font-weight:700;color:#fff;margin-bottom:4px;line-height:1.15;}
+.login-tit em{color:var(--rojo);font-style:normal;}
+.login-barra{width:28px;height:3px;background:var(--rojo);border-radius:2px;margin:14px 0 1.5rem;}
+.login-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:var(--r);padding:4px;margin-bottom:1.5rem;gap:4px;}
+.login-tab{flex:1;padding:9px 4px;text-align:center;font-size:12px;font-weight:600;color:rgba(255,255,255,.4);border-radius:7px;cursor:pointer;transition:all .2s;}
+.login-tab.on{background:var(--sur);color:var(--txt);}
+.login-panel{display:none;}.login-panel.on{display:block;}
+.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.45);margin-bottom:5px;display:block;}
+.linp{width:100%;padding:11px 13px;border:1px solid rgba(255,255,255,.12);border-radius:var(--r2);background:rgba(255,255,255,.07);color:#fff;font-size:14px;font-family:var(--f);margin-bottom:.875rem;transition:border-color .15s;-webkit-appearance:none;appearance:none;}
+.linp::placeholder{color:rgba(255,255,255,.25);}
+.linp:focus{outline:none;border-color:var(--rojo);}
+.linp option{color:var(--txt);background:#fff;}
+.btn-login{width:100%;padding:13px;background:var(--rojo);color:#fff;border:none;border-radius:var(--r2);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--f);transition:background .15s;margin-top:.25rem;}
+.btn-login:hover{background:var(--rojo-d);}
+.login-err{background:var(--rojo-s);color:var(--rojo);border:1px solid var(--rojo-b);border-radius:var(--r2);padding:9px 12px;font-size:13px;margin-bottom:.875rem;display:none;}
+.login-hint{font-size:11px;color:rgba(255,255,255,.25);margin-top:1rem;text-align:center;line-height:1.6;}
+.login-hint code{background:rgba(255,255,255,.08);padding:1px 6px;border-radius:4px;font-size:11px;}
+
+/* VISTA TIENDA */
+#vista-tienda{display:none;min-height:100vh;min-height:100dvh;background:var(--bg);}
+.tienda-hdr{background:var(--txt);padding:1rem 1.25rem;position:sticky;top:0;z-index:50;}
+.tienda-hdr-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.tienda-hdr-marca{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);}
+.tienda-hdr-nom{font-size:15px;font-weight:700;color:#fff;margin-top:1px;}
+.tienda-hdr-nom em{color:var(--rojo);font-style:normal;}
+.btn-tsal{background:none;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:5px 10px;color:rgba(255,255,255,.45);font-size:11px;cursor:pointer;font-family:var(--f);}
+.tienda-body{max-width:640px;margin:0 auto;padding:1.25rem 1rem 5rem;}
+.t-tab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--txt3);transition:all .15s;}
+.t-tab.on{border-bottom-color:var(--rojo);color:var(--rojo);font-weight:700;}
+.pasos{display:flex;background:var(--sur);border-radius:var(--r);border:.5px solid var(--bor);overflow:hidden;margin-bottom:1.25rem;}
+.paso{flex:1;text-align:center;padding:8px 4px;font-size:9px;font-weight:700;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase;border-right:.5px solid var(--bor);transition:all .2s;}
+.paso:last-child{border-right:none;}
+.paso .pn{display:block;font-size:13px;font-weight:700;color:var(--bor2);margin-bottom:1px;transition:color .2s;}
+.paso.ok{background:var(--bs);color:var(--bc);}.paso.ok .pn{color:var(--bc);}
+.paso.activo{background:var(--rojo-s);color:var(--rojo);}.paso.activo .pn{color:var(--rojo);}
+.tcard{background:var(--sur);border-radius:var(--r);border:.5px solid var(--bor);padding:1.1rem 1.25rem;margin-bottom:.875rem;}
+.tcard-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt2);margin-bottom:.875rem;display:flex;align-items:center;gap:6px;}
+.tcard-tit::before{content:'';width:3px;height:13px;background:var(--rojo);border-radius:2px;flex-shrink:0;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:.875rem;}
+.fg:last-child{margin-bottom:0;}
+.fg label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);}
+.fg label .r{color:var(--rojo);}
+.fg select,.fg input,.fg textarea{width:100%;padding:11px 13px;border:1px solid var(--bor);border-radius:var(--r2);font-size:15px;font-family:var(--f);color:var(--txt);background:var(--sur);-webkit-appearance:none;appearance:none;transition:border-color .15s;}
+.fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+.fg select:focus,.fg input:focus,.fg textarea:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 3px rgba(200,16,46,.07);}
+.fg textarea{resize:vertical;min-height:90px;font-size:14px;}
+.urg-auto{border-radius:var(--r2);padding:14px;text-align:center;}
+.urg-auto .ubadge{font-size:15px;font-weight:700;margin-bottom:4px;}
+.urg-auto .uplazo{font-size:12px;opacity:.85;}
+.btn-enviar{width:100%;padding:14px;background:var(--rojo);color:#fff;border:none;border-radius:var(--r);font-size:16px;font-weight:700;cursor:pointer;font-family:var(--f);transition:background .15s;margin-top:.5rem;}
+.btn-enviar:hover{background:var(--rojo-d);}
+.btn-enviar:disabled{background:var(--bor2);cursor:not-allowed;}
+.nota-env{background:var(--as2);border:.5px solid var(--ab3);border-radius:var(--r2);padding:10px 13px;font-size:12px;color:var(--ab2);margin-bottom:.875rem;line-height:1.5;}
+.exito-t{text-align:center;padding:2.5rem 1rem;}
+.exito-t .ico{font-size:56px;margin-bottom:1rem;}
+.exito-t .tit{font-size:20px;font-weight:700;margin-bottom:6px;}
+.exito-t .sub{font-size:14px;color:var(--txt2);line-height:1.6;margin-bottom:1.5rem;}
+.exito-t .det{background:var(--sur);border:.5px solid var(--bor);border-radius:var(--r);padding:1rem 1.25rem;font-size:13px;text-align:left;line-height:2.1;margin-bottom:1.5rem;}
+.btn-nuevo-t{width:100%;padding:13px;background:var(--txt);color:#fff;border:none;border-radius:var(--r);font-size:15px;font-weight:700;cursor:pointer;font-family:var(--f);}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.gar-banner{background:var(--as);border:1.5px solid var(--ac);border-radius:var(--r);padding:1.1rem 1.25rem;margin-bottom:1rem;color:var(--ac);}
+.gar-banner .gt{font-size:15px;font-weight:700;margin-bottom:6px;}
+.gar-banner .gs{font-size:13px;line-height:1.6;}
+.foto-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.foto-mini{width:76px;height:76px;border-radius:8px;object-fit:cover;border:1px solid var(--bor);position:relative;}
+.foto-wrap{position:relative;}
+.foto-x{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--rojo);color:#fff;border:none;border-radius:50%;font-size:11px;cursor:pointer;line-height:1;}
+.sla-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.sla-ok{background:var(--bs);color:var(--bc);border:1px solid var(--bb);}
+.sla-warn{background:var(--ms);color:var(--mc);border:1px solid var(--mb);}
+.sla-venc{background:var(--vs);color:var(--vc);border:1px solid var(--vb);}
+
+/* VISTA OPERACIONES */
+#vista-ops{display:none;min-height:100vh;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--txt);display:flex;flex-direction:column;z-index:100;}
+.sb-hdr{padding:1.4rem 1.2rem 1rem;border-bottom:1px solid rgba(255,255,255,.07);}
+.sb-marca{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.28);margin-bottom:5px;}
+.sb-tit{font-size:15px;font-weight:700;color:#fff;line-height:1.2;}
+.sb-tit em{color:var(--rojo);font-style:normal;}
+.sb-nav{flex:1;padding:.75rem 0;overflow-y:auto;}
+.sb-sec{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.2);padding:10px 1.2rem 3px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 1.2rem;font-size:13px;color:rgba(255,255,255,.5);cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+.sb-item.on{color:#fff;border-left-color:var(--rojo);background:rgba(200,16,46,.1);}
+.sb-item svg{flex-shrink:0;width:15px;height:15px;opacity:.7;}
+.sb-item.on svg{opacity:1;}
+.sb-foot{padding:1rem 1.2rem;border-top:1px solid rgba(255,255,255,.07);}
+.sb-user{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.sb-av{width:28px;height:28px;border-radius:50%;background:var(--rojo);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-uname{font-size:11px;color:rgba(255,255,255,.45);line-height:1.3;word-break:break-all;}
+.btn-out{width:100%;padding:6px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:6px;color:rgba(255,255,255,.4);font-size:11px;cursor:pointer;font-family:var(--f);}
+.btn-out:hover{color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.25);}
+.main{margin-left:220px;padding:1.75rem;}
+.sec{display:none;}.sec.on{display:block;}
+.sec-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.4rem;gap:1rem;flex-wrap:wrap;}
+.sec-tit{font-size:20px;font-weight:700;}
+.sec-sub{font-size:12px;color:var(--txt2);margin-top:2px;}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px;margin-bottom:1.4rem;}
+.kpi{background:var(--sur);border-radius:var(--r2);padding:.875rem 1rem;border:.5px solid var(--bor);}
+.kpi.clickable{cursor:pointer;transition:all .15s;}
+.kpi.clickable:hover{border-color:var(--rojo);box-shadow:0 2px 8px rgba(200,16,46,.1);}
+.kpi-l{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:4px;}
+.kpi-v{font-size:24px;font-weight:700;line-height:1;}
+.card{background:var(--sur);border-radius:var(--r);border:.5px solid var(--bor);padding:1.1rem 1.25rem;margin-bottom:.875rem;}
+.card-tit{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt2);margin-bottom:.875rem;display:flex;align-items:center;gap:6px;}
+.card-tit::before{content:'';width:3px;height:13px;background:var(--rojo);border-radius:2px;flex-shrink:0;}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.bdot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.u-c{background:var(--vs);color:var(--vc);border:1px solid var(--vb);}
+.u-a{background:var(--as);color:var(--ac);border:1px solid var(--ab);}
+.u-m{background:var(--ms);color:var(--mc);border:1px solid var(--mb);}
+.u-b{background:var(--bs);color:var(--bc);border:1px solid var(--bb);}
+.e-ab{background:var(--as2);color:var(--ab2);border:1px solid var(--ab3);}
+.e-eg{background:var(--gs);color:var(--gc);border:1px solid var(--gb);}
+.e-fi{background:var(--bs);color:var(--bc);border:1px solid var(--bb);}
+.z-s{background:#ede9f6;color:#5b3db5;border:1px solid #d4b8f0;}
+.z-r{background:var(--as2);color:var(--ab2);border:1px solid var(--ab3);}
+.p-pend{background:var(--ms);color:var(--mc);border:1px solid var(--mb);}
+.p-ok{background:var(--bs);color:var(--bc);border:1px solid var(--bb);}
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+thead th{text-align:left;padding:7px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);border-bottom:1px solid var(--bor);white-space:nowrap;}
+tbody tr{border-bottom:.5px solid var(--bor);transition:background .1s;cursor:pointer;}
+tbody tr:hover{background:var(--sur2);}
+tbody td{padding:9px 10px;vertical-align:middle;}
+.tid{font-size:11px;font-weight:700;color:var(--txt3);font-family:monospace;white-space:nowrap;}
+.ttit{font-weight:600;font-size:13px;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tsub{font-size:11px;color:var(--txt3);margin-top:1px;}
+.filtros{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;}
+.filtros select,.filtros input{padding:6px 9px;border:1px solid var(--bor);border-radius:7px;font-size:12px;background:var(--sur);color:var(--txt);font-family:var(--f);}
+.filtros select:focus,.filtros input:focus{outline:none;border-color:var(--rojo);}
+.btn{padding:7px 14px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;font-family:var(--f);transition:all .15s;}
+.btn-p{background:var(--rojo);color:#fff;}.btn-p:hover{background:var(--rojo-d);}
+.btn-s{background:var(--sur);color:var(--txt);border:1px solid var(--bor);}.btn-s:hover{background:var(--sur2);}
+.btn-g{background:#1a7a4a;color:#fff;}.btn-g:hover{background:#145e38;}
+.btn-w{background:#d4580a;color:#fff;}.btn-w:hover{background:#a84008;}
+.btn-sm{padding:4px 9px;font-size:11px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:300;align-items:center;justify-content:center;padding:1rem;}
+.overlay.on{display:flex;}
+.modal{background:var(--sur);border-radius:12px;padding:1.6rem;width:680px;max-width:98vw;max-height:92vh;overflow-y:auto;}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;}
+.modal-tit{font-size:16px;font-weight:700;}
+.btnx{background:none;border:none;cursor:pointer;color:var(--txt3);font-size:20px;line-height:1;padding:2px;}
+.modal-tabs{display:flex;gap:0;border-bottom:1px solid var(--bor);margin-bottom:1.1rem;}
+.mtab{padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;color:var(--txt3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.mtab.on{color:var(--rojo);border-bottom-color:var(--rojo);}
+.mtab-p{display:none;}.mtab-p.on{display:block;}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.ofg{display:flex;flex-direction:column;gap:4px;margin-bottom:0;}
+.ofg.full{grid-column:1/-1;}
+.ofg label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);}
+.ofg label .r{color:var(--rojo);}
+.ofg input,.ofg select,.ofg textarea{padding:8px 11px;border:1px solid var(--bor);border-radius:7px;font-size:13px;font-family:var(--f);color:var(--txt);background:var(--sur);-webkit-appearance:none;appearance:none;transition:border-color .15s;}
+.ofg input:focus,.ofg select:focus,.ofg textarea:focus{outline:none;border-color:var(--rojo);box-shadow:0 0 0 3px rgba(200,16,46,.07);}
+.ofg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%239a9590' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:28px;}
+.ofg textarea{resize:vertical;min-height:70px;}
+.oauto{background:var(--sur2)!important;color:var(--txt2)!important;font-style:italic;}
+.hist-row{display:flex;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bor);}
+.hist-row:last-child{border-bottom:none;}
+.hdot{width:7px;height:7px;border-radius:50%;background:var(--rojo);flex-shrink:0;margin-top:4px;}
+.htxt{font-size:12px;color:var(--txt2);line-height:1.5;}
+.hfecha{font-size:10px;color:var(--txt3);margin-top:1px;}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.k-col{background:var(--sur2);border-radius:var(--r);border:.5px solid var(--bor);padding:.875rem;}
+.k-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.875rem;display:flex;align-items:center;justify-content:space-between;}
+.k-cnt{font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;}
+.tkcard{background:var(--sur);border-radius:var(--r2);border:.5px solid var(--bor);padding:.875rem;margin-bottom:7px;cursor:pointer;transition:all .15s;}
+.tkcard:hover{border-color:var(--rojo);}
+.tkid{font-size:10px;font-weight:700;color:var(--txt3);font-family:monospace;margin-bottom:3px;}
+.tktit{font-size:13px;font-weight:600;margin-bottom:2px;line-height:1.3;}
+.tksub{font-size:11px;color:var(--txt3);margin-bottom:5px;}
+.tkbadges{display:flex;gap:4px;flex-wrap:wrap;}
+.alerta{padding:9px 12px;border-radius:7px;font-size:12.5px;margin-bottom:.875rem;display:none;}
+.alerta.ok{background:var(--bs);color:var(--bc);border:1px solid var(--bb);display:block;}
+.alerta.err{background:var(--rojo-s);color:var(--rojo);border:1px solid var(--rojo-b);display:block;}
+.vacio{text-align:center;padding:2.5rem 1rem;color:var(--txt3);font-size:13px;}
+.vacio i{font-size:28px;margin-bottom:8px;opacity:.3;display:block;font-style:normal;}
+.imp-info{background:var(--as2);border:1px solid var(--ab3);border-radius:var(--r2);padding:10px 13px;font-size:13px;color:var(--ab2);margin-bottom:1rem;}
+.ejs-banner{background:var(--as);border:1px solid var(--ab);border-radius:var(--r2);padding:12px 14px;font-size:13px;color:var(--ac);margin-bottom:1rem;}
+.ejs-banner strong{font-weight:600;display:block;margin-bottom:3px;}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(4rem);background:var(--txt);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.tienda-cfg-row{display:flex;align-items:center;gap:8px;padding:10px 12px;border:.5px solid var(--bor);border-radius:var(--r2);background:var(--sur2);margin-bottom:6px;flex-wrap:wrap;}
+.tienda-cfg-info{flex:1;min-width:180px;}
+.tienda-cfg-nom{font-size:13px;font-weight:600;}
+.tienda-cfg-sub{font-size:11px;color:var(--txt3);}
+.tienda-cfg-pass{width:110px;padding:5px 8px;border:1px solid var(--bor);border-radius:6px;font-size:12px;font-family:var(--f);}
+.tienda-cfg-pass:focus{outline:none;border-color:var(--rojo);}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--txt);border-top:1px solid rgba(255,255,255,.08);z-index:100;padding:.5rem 0 calc(.5rem + env(safe-area-inset-bottom));}
+.mob-nav-items{display:flex;justify-content:space-around;}
+.mob-nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:.4rem .6rem;cursor:pointer;color:rgba(255,255,255,.4);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;transition:color .15s;}
+.mob-nav-item svg{width:20px;height:20px;}
+.mob-nav-item.on{color:var(--rojo);}
+@media(max-width:800px){.sidebar{width:190px;}.main{margin-left:190px;padding:1rem;}.kanban{grid-template-columns:1fr;}.fgrid{grid-template-columns:1fr;}}
+@media(max-width:600px){#vista-ops .sidebar{display:none;}#vista-ops .main{margin-left:0;padding:.875rem;padding-bottom:5rem;}.mob-nav{display:flex;}}
+</style>
+</head>
+<body>
+
+<!-- PANTALLA DE CARGA -->
+<div id="fb-loading" style="display:none;min-height:100vh;min-height:100dvh;align-items:center;justify-content:center;background:var(--txt);">
+  <div style="text-align:center;">
+    <div style="width:36px;height:36px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--rojo);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 1rem;"></div>
+    <div style="color:rgba(255,255,255,.5);font-size:13px;">Conectando con la base de datos...</div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-wrap">
+    <div class="login-logo">Gama Italy</div>
+    <div class="login-tit">TUA <em>Operaciones</em></div>
+    <div class="login-barra"></div>
+    <div class="login-tabs">
+      <div class="login-tab on" onclick="ltab('tienda')">Tienda</div>
+      <div class="login-tab" onclick="ltab('sup')">Supervisor</div>
+      <div class="login-tab" onclick="ltab('ops')">Operaciones</div>
+    </div>
+
+    <!-- LOGIN TIENDA -->
+    <div class="login-panel on" id="lp-tienda">
+      <div class="login-err" id="lerr-t"></div>
+      <label class="lbl">Correo de la tienda</label>
+      <input type="email" class="linp" id="lt-mail" placeholder="ejemplo@tua.cl" autocomplete="username" onkeydown="if(event.key==='Enter')loginTienda()">
+      <label class="lbl">Contraseña</label>
+      <input type="password" class="linp" id="lt-pass" placeholder="Contraseña de tu tienda" onkeydown="if(event.key==='Enter')loginTienda()">
+      <button class="btn-login" onclick="loginTienda()">Ingresar</button>
+      <div class="login-hint">Ingresa con el correo de tu tienda.<br>Si no tienes la contraseña, consulta con operaciones.</div>
+    </div>
+
+    <!-- LOGIN SUPERVISOR -->
+    <div class="login-panel" id="lp-sup">
+      <div class="login-err" id="lerr-s"></div>
+      <label class="lbl">Supervisor</label>
+      <select class="linp" id="ls-sup"><option value="">Selecciona tu nombre...</option></select>
+      <label class="lbl">Contraseña</label>
+      <input type="password" class="linp" id="ls-pass" placeholder="Contraseña de supervisor" onkeydown="if(event.key==='Enter')loginSup()">
+      <button class="btn-login" onclick="loginSup()">Ingresar como Supervisor</button>
+      <div class="login-hint">Solo verás los tickets de las tiendas de tu zona.</div>
+    </div>
+
+    <!-- LOGIN OPERACIONES -->
+    <div class="login-panel" id="lp-ops">
+      <div class="login-err" id="lerr-o"></div>
+      <label class="lbl">Correo</label>
+      <input type="email" class="linp" id="lo-mail" value="operacionestua20@gmail.com">
+      <label class="lbl">Contraseña</label>
+      <input type="password" class="linp" id="lo-pass" placeholder="Contraseña operaciones" onkeydown="if(event.key==='Enter')loginOps()">
+      <button class="btn-login" onclick="loginOps()">Ingresar a Operaciones</button>
+      <div class="login-hint">Acceso exclusivo equipo de operaciones.</div>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA TIENDA -->
+<div id="vista-tienda">
+  <div class="tienda-hdr">
+    <div class="tienda-hdr-inner">
+      <div><div class="tienda-hdr-marca">Gama Italy · TUA</div><div class="tienda-hdr-nom" id="th-nom">Mi <em>Tienda</em></div></div>
+      <button class="btn-tsal" onclick="logout()">Salir</button>
+    </div>
+  </div>
+
+  <div style="background:var(--sur);border-bottom:1px solid var(--bor);position:sticky;top:60px;z-index:40;">
+    <div style="max-width:640px;margin:0 auto;display:flex;">
+      <div class="t-tab on" id="ttab-nuevo" onclick="tCambiarTab('nuevo')">Nuevo caso</div>
+      <div class="t-tab" id="ttab-historial" onclick="tCambiarTab('historial')">Mis tickets</div>
+    </div>
+  </div>
+
+  <div class="tienda-body">
+    <!-- BANNER GARANTÍA (se muestra solo si la tienda está en garantía) -->
+    <div class="gar-banner" id="gar-banner" style="display:none;">
+      <div class="gt">🛡️ Tu tienda está en período de garantía</div>
+      <div class="gs" id="gar-detalle"></div>
+    </div>
+
+    <!-- PANEL NUEVO CASO -->
+    <div id="t-panel-nuevo">
+      <div class="pasos">
+        <div class="paso activo" id="ps1"><span class="pn">1</span>Tipo</div>
+        <div class="paso" id="ps2"><span class="pn">2</span>Detalle</div>
+        <div class="paso" id="ps3"><span class="pn">3</span>Enviar</div>
+      </div>
+      <div class="alerta" id="al-t"></div>
+      <div class="tcard">
+        <div class="tcard-tit">¿Qué necesitas?</div>
+        <div class="fg">
+          <label>Tipo de requerimiento <span class="r">*</span></label>
+          <select id="t-tipo" onchange="tTipoChange()">
+            <option value="">Seleccionar...</option>
+            <option>Cortina metálica falla</option>
+            <option>Electricidad</option>
+            <option>Gasfitería</option>
+            <option>Mobiliario</option>
+            <option>Vitrina (trizada, quebrada)</option>
+            <option>Caja fuerte</option>
+            <option>Gaveta de dinero</option>
+            <option>Control de plagas (excepcional)</option>
+          </select>
+        </div>
+        <div class="fg" id="fg-gestion">
+          <label id="lbl-gestion">Tipo de gestión <span class="r">*</span></label>
+          <select id="t-gestion" onchange="tPaso()">
+            <option value="">Seleccionar...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- URGENCIA AUTOMÁTICA (no editable) -->
+      <div class="tcard" id="t-card-urg" style="display:none;">
+        <div class="tcard-tit">Urgencia asignada automáticamente</div>
+        <div class="urg-auto" id="t-urg-auto"></div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:8px;text-align:center;">La urgencia se asigna según el tipo de requerimiento y define el plazo máximo de resolución.</div>
+      </div>
+
+      <!-- DETALLE + FOTOS -->
+      <div class="tcard" id="t-card-det" style="display:none;">
+        <div class="tcard-tit">Describe el problema</div>
+        <div class="fg">
+          <label>Descripción <span class="r">*</span></label>
+          <textarea id="t-desc" placeholder="Describe detalladamente el problema..."></textarea>
+        </div>
+        <div class="fg">
+          <label>Fotos del problema (opcional, máx. 2)</label>
+          <input type="file" id="t-fotos" accept="image/*" multiple onchange="tFotosSel(this)" style="padding:9px;">
+          <div class="foto-grid" id="t-fotos-prev"></div>
+        </div>
+      </div>
+
+      <div id="t-enviar-wrap" style="display:none;">
+        <div class="nota-env">📋 Tu caso llegará directamente al equipo de operaciones con número de ticket asignado automáticamente.</div>
+        <button class="btn-enviar" id="btn-t-env" onclick="tEnviar()">Enviar caso a operaciones</button>
+      </div>
+    </div>
+
+    <!-- ÉXITO -->
+    <div class="exito-t" id="t-exito" style="display:none;">
+      <div class="ico">✅</div>
+      <div class="tit">¡Caso enviado!</div>
+      <div class="sub">Tu requerimiento fue registrado. El equipo de operaciones lo revisará y gestionará dentro del plazo según su urgencia.</div>
+      <div class="det" id="t-exito-det"></div>
+      <button class="btn-nuevo-t" onclick="tReset()">Ingresar otro caso</button>
+    </div>
+
+    <!-- PANEL MIS TICKETS -->
+    <div id="t-panel-historial" style="display:none;">
+      <div id="t-mis-tickets"></div>
+    </div>
+  </div>
+</div>
+
+<!-- VISTA OPERACIONES -->
+<div id="vista-ops">
+  <nav class="sidebar">
+    <div class="sb-hdr">
+      <div class="sb-marca">Gama Italy</div>
+      <div class="sb-tit">TUA <em>Ops</em></div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-sec">General</div>
+      <div class="sb-item on" onclick="ir('dashboard')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="sb-sec">Tickets</div>
+      <div class="sb-item" onclick="ir('tickets')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Todos los tickets</div>
+      <div class="sb-item" onclick="ir('kanban')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>Kanban</div>
+      <div class="sb-item solo-ops" onclick="ir('nuevo')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Nuevo ticket</div>
+      <div class="sb-item solo-ops" onclick="ir('importar')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Importar Forms</div>
+      <div class="sb-sec">Config</div>
+      <div class="sb-item" onclick="ir('reportes')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reportes</div>
+      <div class="sb-item solo-ops" onclick="ir('config')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración</div>
+    </div>
+    <div class="sb-foot">
+      <div class="sb-user"><div class="sb-av" id="sb-av">OT</div><div class="sb-uname" id="sb-uname">operaciones</div></div>
+      <button class="btn-out" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </nav>
+
+  <div class="mob-nav">
+    <div class="mob-nav-items">
+      <div class="mob-nav-item on" onclick="ir('dashboard')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Inicio</div>
+      <div class="mob-nav-item" onclick="ir('tickets')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Tickets</div>
+      <div class="mob-nav-item solo-ops" onclick="ir('nuevo')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Nuevo</div>
+      <div class="mob-nav-item" onclick="ir('kanban')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>Kanban</div>
+      <div class="mob-nav-item solo-ops" onclick="ir('config')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Config</div>
+    </div>
+  </div>
+
+  <main class="main">
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard" class="sec on">
+      <div class="sec-hdr">
+        <div><div class="sec-tit">Dashboard</div><div class="sec-sub" id="dash-sub">Estado operacional en tiempo real</div></div>
+        <select id="dash-mes" onchange="renderDash()" style="padding:6px 9px;border:1px solid var(--bor);border-radius:7px;font-size:12px;background:var(--sur);font-family:var(--f);">
+          <option value="">Todos los meses</option>
+          <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+        </select>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <!-- CRÍTICOS EXPANDIBLE -->
+      <div class="card" id="card-criticos-lista" style="display:none;border-color:var(--vb);">
+        <div class="card-tit" style="color:var(--vc);">🔴 Casos críticos — orden por antigüedad</div>
+        <div id="d-criticos-lista"></div>
+      </div>
+      <div class="card" id="card-vencidos" style="border-color:var(--vb);display:none;">
+        <div class="card-tit" style="color:var(--vc);">⚠️ Plazos vencidos (SLA)</div>
+        <div id="d-vencidos"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem;">
+        <div class="card"><div class="card-tit">Críticos y Altos activos</div><div id="d-urgentes"></div></div>
+        <div class="card"><div class="card-tit">Últimos ingresados</div><div id="d-recientes"></div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem;">
+        <div class="card"><div class="card-tit">Por tipo</div><div id="d-tipos" style="display:flex;flex-wrap:wrap;gap:6px;"></div></div>
+        <div class="card"><div class="card-tit">Por supervisor</div><div id="d-sups" style="display:flex;flex-wrap:wrap;gap:6px;"></div></div>
+      </div>
+    </div>
+
+    <!-- TICKETS -->
+    <div id="sec-tickets" class="sec">
+      <div class="sec-hdr">
+        <div><div class="sec-tit">Todos los tickets</div><div class="sec-sub" id="tkt-count"></div></div>
+        <div style="display:flex;gap:6px;"><button class="btn btn-s btn-sm" onclick="exportAll()">↓ Excel</button><button class="btn btn-p btn-sm solo-ops" onclick="ir('nuevo')">+ Nuevo</button></div>
+      </div>
+      <div class="card">
+        <div class="filtros">
+          <select id="f-zona" onchange="filtrar()"><option value="">Toda zona</option></select>
+          <select id="f-tipo" onchange="filtrar()">
+            <option value="">Todo tipo</option>
+            <option>Cortina metálica falla</option><option>Electricidad</option><option>Gasfitería</option>
+            <option>Mobiliario</option><option>Vitrina (trizada, quebrada)</option><option>Caja fuerte</option>
+            <option>Gaveta de dinero</option><option>Control de plagas (excepcional)</option>
+          </select>
+          <select id="f-urg" onchange="filtrar()"><option value="">Toda urgencia</option><option>Crítica</option><option>Alta</option><option>Media</option><option>Baja</option></select>
+          <select id="f-est" onchange="filtrar()"><option value="">Todo estatus</option><option>Abierto</option><option>En gestión</option><option>Finalizado</option></select>
+          <select id="f-presu" onchange="filtrar()"><option value="">Todo presupuesto</option><option value="ok">Bajo presupuesto</option><option value="pend">Pendiente de presupuesto</option></select>
+          <select id="f-sup" onchange="filtrar()"><option value="">Todos los supervisores</option></select>
+          <input type="text" id="f-bus" placeholder="Buscar tienda, ID..." oninput="filtrar()" style="min-width:150px;">
+        </div>
+        <div class="twrap"><table><thead><tr><th>ID</th><th>Tienda</th><th>Tipo</th><th>Urgencia</th><th>SLA</th><th>Presupuesto</th><th>Zona</th><th>Estatus</th><th>Fecha</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- KANBAN -->
+    <div id="sec-kanban" class="sec">
+      <div class="sec-hdr"><div><div class="sec-tit">Kanban</div><div class="sec-sub">Flujo de tickets por estado</div></div></div>
+      <div class="kanban" id="kanban"></div>
+    </div>
+
+    <!-- NUEVO TICKET (solo ops) -->
+    <div id="sec-nuevo" class="sec">
+      <div class="sec-hdr"><div><div class="sec-tit">Nuevo ticket</div><div class="sec-sub">Ingreso manual — Santiago o directo</div></div></div>
+      <div class="card">
+        <div class="alerta" id="al-n"></div>
+        <form id="form-nuevo" onsubmit="crearTicket(event)">
+          <div class="fgrid">
+            <div class="ofg"><label>Tienda <span class="r">*</span></label><select id="n-tienda" required onchange="onTiendaSel()"><option value="">Seleccionar...</option></select></div>
+            <div class="ofg"><label>Zona</label><input type="text" id="n-zona" class="oauto" readonly></div>
+            <div class="ofg"><label>Supervisor</label><input type="text" id="n-sup" class="oauto" readonly></div>
+            <div class="ofg"><label>Tipo <span class="r">*</span></label>
+              <select id="n-tipo" required onchange="oTipoChange()">
+                <option value="">Seleccionar...</option>
+                <option>Cortina metálica falla</option><option>Electricidad</option><option>Gasfitería</option>
+                <option>Mobiliario</option><option>Vitrina (trizada, quebrada)</option><option>Caja fuerte</option>
+                <option>Gaveta de dinero</option><option>Control de plagas (excepcional)</option>
+              </select>
+            </div>
+            <div class="ofg"><label id="n-lbl-gestion">Gestión <span class="r">*</span></label><select id="n-gest" required><option value="">Seleccionar...</option></select></div>
+            <div class="ofg"><label>Urgencia (automática)</label><input type="text" id="n-urg-vista" class="oauto" readonly placeholder="Se asigna según el tipo"></div>
+            <div class="ofg"><label>Fecha planificada</label><input type="date" id="n-fplan"></div>
+            <div class="ofg"><label>Proveedor</label><input type="text" id="n-prov" placeholder="Proveedor o técnico"></div>
+            <div class="ofg full"><label>Descripción</label><textarea id="n-desc" placeholder="Detalla el problema..."></textarea></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:1rem;"><button type="submit" class="btn btn-p">Crear ticket</button><button type="button" class="btn btn-s" onclick="limpiarN()">Limpiar</button></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- IMPORTAR (solo ops) -->
+    <div id="sec-importar" class="sec">
+      <div class="sec-hdr"><div><div class="sec-tit">Importar desde Forms</div><div class="sec-sub">Carga el Excel de respuestas del formulario de Google</div></div></div>
+      <div class="card">
+        <div class="alerta" id="al-i"></div>
+        <div class="imp-info"><strong>Cómo usar:</strong> Exporta las respuestas del Forms como CSV desde Google Sheets → Archivo → Descargar → CSV.</div>
+        <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:flex-end;">
+          <div class="ofg" style="flex:1;"><label>URL Google Sheet (público)</label><input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..."></div>
+          <button class="btn btn-p" onclick="impURL()">Conectar</button>
+        </div>
+        <div style="border-top:1px solid var(--bor);padding-top:1rem;">
+          <div class="ofg" style="margin-bottom:.875rem;"><label>O sube archivo CSV</label><input type="file" id="arch-csv" accept=".csv,.xlsx,.xls" style="padding:7px;"></div>
+          <button class="btn btn-s" onclick="impArch()">Importar archivo</button>
+        </div>
+      </div>
+      <div id="prev-wrap" style="display:none;" class="card">
+        <div class="card-tit">Vista previa — <span id="prev-n"></span> tickets detectados</div>
+        <div id="prev-tabla"></div>
+        <div style="display:flex;gap:8px;margin-top:1rem;"><button class="btn btn-g" onclick="confImp()">✓ Confirmar e importar</button><button class="btn btn-s" onclick="cancImp()">Cancelar</button></div>
+      </div>
+    </div>
+
+    <!-- REPORTES -->
+    <div id="sec-reportes" class="sec">
+      <div class="sec-hdr"><div><div class="sec-tit">Reportes</div><div class="sec-sub">Exporta y analiza la operación</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.875rem;margin-bottom:.875rem;">
+        <div class="card" style="cursor:pointer;" onclick="exportAll()"><div style="font-size:22px;margin-bottom:6px;">📊</div><div style="font-size:14px;font-weight:600;margin-bottom:3px;">Exportar todos los tickets</div><div style="font-size:12px;color:var(--txt3);">Excel completo con historial.</div></div>
+        <div class="card" style="cursor:pointer;" onclick="exportPend()"><div style="font-size:22px;margin-bottom:6px;">⏳</div><div style="font-size:14px;font-weight:600;margin-bottom:3px;">Pendientes</div><div style="font-size:12px;color:var(--txt3);">Abiertos y En gestión.</div></div>
+        <div class="card" style="cursor:pointer;" onclick="exportVenc()"><div style="font-size:22px;margin-bottom:6px;">⚠️</div><div style="font-size:14px;font-weight:600;margin-bottom:3px;">Fuera de plazo (SLA)</div><div style="font-size:12px;color:var(--txt3);">Tickets con plazo vencido.</div></div>
+      </div>
+      <div class="card"><div class="card-tit">Resumen por supervisor</div><div id="rep-sups"></div></div>
+      <div class="card"><div class="card-tit">Participación de tiendas</div><div id="rep-participacion"></div></div>
+    </div>
+
+    <!-- CONFIG (solo ops) -->
+    <div id="sec-config" class="sec">
+      <div class="sec-hdr"><div><div class="sec-tit">Configuración</div><div class="sec-sub">Usuarios, tiendas y notificaciones</div></div></div>
+
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div class="card-tit" style="margin-bottom:2px;">Sesión activa</div>
+          <div style="font-size:13px;color:var(--txt2);" id="cfg-sesion-info">Conectado como <strong>operaciones</strong></div>
+        </div>
+        <button class="btn btn-w" onclick="logout()">Cerrar sesión</button>
+      </div>
+
+      <div class="card">
+        <div class="card-tit">Notificaciones por correo</div>
+        <div id="ejs-status"></div>
+        <p style="font-size:13px;color:var(--txt2);margin-bottom:1rem;">Cada nuevo ticket envía correo automático a los destinatarios configurados en el código (operaciones + supervisión).</p>
+        <div class="fgrid">
+          <div class="ofg"><label>Service ID</label><input type="text" id="cfg-sid" placeholder="service_xxxxxxx"></div>
+          <div class="ofg"><label>Template ID</label><input type="text" id="cfg-tid" placeholder="template_xxxxxxx"></div>
+          <div class="ofg full"><label>Public Key</label><input type="text" id="cfg-pk" placeholder="xxxxxxxxxxxxxxxxxxxx"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:.875rem;">
+          <button class="btn btn-p" onclick="guardarEJS()">Guardar configuración</button>
+          <button class="btn btn-s" onclick="testEJS()">Enviar correo de prueba</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-tit">Contraseña de operaciones</div>
+        <div style="display:flex;gap:8px;align-items:flex-end;">
+          <div class="ofg" style="flex:1;"><label>Nueva contraseña</label><input type="password" id="cfg-pass-o" placeholder="Nueva contraseña"></div>
+          <button class="btn btn-p" onclick="cambiarPassOps()">Guardar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-tit">Contraseñas de supervisores</div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:.875rem;">Cada supervisor entra con su nombre y su contraseña, y solo ve los tickets de sus tiendas.</p>
+        <div id="lista-sups-cfg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-tit" style="justify-content:space-between;">
+          <span style="display:flex;align-items:center;gap:6px;"><span style="width:3px;height:13px;background:var(--rojo);border-radius:2px;"></span>Tiendas registradas (<span id="cfg-n-tiendas"></span>)</span>
+          <button class="btn btn-p btn-sm" onclick="abrirModalTienda()">+ Agregar tienda</button>
+        </div>
+        <p style="font-size:12px;color:var(--txt3);margin-bottom:.875rem;">Login por correo de la tienda. Contraseña estándar: primeros 5 caracteres del correo + 2026. Las tiendas con fecha de apertura reciente quedan en garantía por 6 meses.</p>
+        <input type="text" id="cfg-buscar-tienda" placeholder="Buscar tienda..." oninput="renderListaTiendas()" style="width:100%;padding:8px 11px;border:1px solid var(--bor);border-radius:7px;font-size:13px;font-family:var(--f);margin-bottom:.75rem;">
+        <div id="lista-tiendas-cfg" style="max-height:480px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL DETALLE TICKET -->
+<div class="overlay" id="modal-tkt">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-tit" id="mt-id-tit"></div><button class="btnx" onclick="cerrar('modal-tkt')">&#x2715;</button></div>
+    <div class="modal-tabs">
+      <div class="mtab on" onclick="mtab('det')">Detalle</div>
+      <div class="mtab" onclick="mtab('hist')">Historial</div>
+      <div class="mtab solo-ops" onclick="mtab('edit')">Editar</div>
+    </div>
+    <div id="mt-det" class="mtab-p on"></div>
+    <div id="mt-hist" class="mtab-p"></div>
+    <div id="mt-edit" class="mtab-p"></div>
+    <div style="display:flex;gap:8px;margin-top:1.1rem;" id="mt-acc"></div>
+  </div>
+</div>
+
+<!-- MODAL AGREGAR/EDITAR TIENDA -->
+<div class="overlay" id="modal-tienda">
+  <div class="modal" style="width:520px;">
+    <div class="modal-hdr"><div class="modal-tit" id="mt-tit-tienda">Agregar tienda</div><button class="btnx" onclick="cerrar('modal-tienda')">&#x2715;</button></div>
+    <div class="fgrid">
+      <div class="ofg full"><label>Nombre de la tienda <span class="r">*</span></label><input type="text" id="mt-nom" placeholder="Ej: Mall Plaza Valparaíso"></div>
+      <div class="ofg full"><label>Correo de la tienda <span class="r">*</span></label><input type="email" id="mt-mail" placeholder="tienda@tua.cl"></div>
+      <div class="ofg"><label>Supervisor</label><select id="mt-sup"><option value="">Seleccionar...</option></select></div>
+      <div class="ofg"><label>Zona</label><select id="mt-zona"></select></div>
+      <div class="ofg"><label>Fecha de apertura</label><input type="date" id="mt-apertura"><div style="font-size:10px;color:var(--txt3);margin-top:2px;">Si tiene menos de 6 meses queda en garantía</div></div>
+      <div class="ofg"><label>Contraseña <span class="r">*</span></label><input type="text" id="mt-pass" placeholder="primeros5correo+2026"></div>
+      <div class="ofg"><label>Estado</label><select id="mt-activa"><option value="1">Activa</option><option value="0">Inactiva</option></select></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:1rem;">
+      <button class="btn btn-p" onclick="guardarTienda()">Guardar tienda</button>
+      <button class="btn btn-s" onclick="cerrar('modal-tienda')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FOTO AMPLIADA -->
+<div class="overlay" id="modal-foto" onclick="cerrar('modal-foto')">
+  <img id="foto-grande" style="max-width:92vw;max-height:88vh;border-radius:12px;" alt="Foto del ticket">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TIENDAS_BASE = [
+  {t:'Lider Plaza Norte',mail:'tnorte@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'',pass:'tnort2026',activa:1},
+  {t:'Maipu',mail:'maipu@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'',pass:'maipu2026',activa:1},
+  {t:'Mall Arauco Maipu',mail:'mallmaipu@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'',pass:'mallm2026',activa:1},
+  {t:'Jumbo Mall Arauco Maipú',mail:'jamaipu@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2024-03-13',pass:'jamai2026',activa:1},
+  {t:'Mall Plaza Oeste',mail:'malloeste@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'',pass:'mallo2026',activa:1},
+  {t:'Mall Plaza Norte',mail:'mallplazanorte2@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2024-12-14',pass:'mallp2026',activa:1},
+  {t:'Antiage Mall Plaza Norte',mail:'antiagempnorte@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2026-02-06',pass:'antia2026',activa:1},
+  {t:'Antiage Mall Plaza Oeste',mail:'antiagempoeste@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2026-01-31',pass:'antia2026',activa:1},
+  {t:'Tua Men Arauco Maipu',mail:'menmallmaipu@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-10-24',pass:'menma2026',activa:1},
+  {t:'Tua Men Mall Plaza Norte',mail:'menmpnorte@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2026-01-07',pass:'menmp2026',activa:1},
+  {t:'Tua Men Parque Arauco',mail:'menparauco@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-08-13',pass:'menpa2026',activa:1},
+  {t:'Tua Men Costanera Center',mail:'tccentermen@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2024-05-23',pass:'tccen2026',activa:1},
+  {t:'Tua Men Marina',mail:'menmarina@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-02-08',pass:'menma2026',activa:1},
+  {t:'Tua Men Mall Plaza Arica',mail:'menmparica@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-10-15',pass:'menmp2026',activa:1},
+  {t:'Tua Men Plaza Vespucio',mail:'menmpvespucio@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-12-24',pass:'menmp2026',activa:1},
+  {t:'Tua Men Florida Center',mail:'menfloridacenter@tua.cl',s:'FERNANDO CARRASCO',z:'Santiago Poniente',apertura:'2025-03-08',pass:'menfl2026',activa:1},
+  {t:'Apumanque',mail:'apumanque@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'apuma2026',activa:1},
+  {t:'Vitacura',mail:'vitacura@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'vitac2026',activa:1},
+  {t:'Mall Alto Las Condes',mail:'altolascondes@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'altol2026',activa:1},
+  {t:'Costanera Center',mail:'tccenter@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'tccen2026',activa:1},
+  {t:'Mall Alto Las Condes 2',mail:'altolascondes2@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'altol2026',activa:1},
+  {t:'Metro Tobalaba',mail:'metrotobalaba@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2025-03-26',pass:'metro2026',activa:1},
+  {t:'Apumanque 2',mail:'apumanque2@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2025-05-22',pass:'apuma2026',activa:1},
+  {t:'Parque Arauco',mail:'parauco2@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2025-05-27',pass:'parau2026',activa:1},
+  {t:'TUA Parque Arauco - Rosario',mail:'paraucorosario@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2025-12-19',pass:'parau2026',activa:1},
+  {t:'Espacio Urbano La Dehesa',mail:'euladehesa@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2026-02-19',pass:'eulad2026',activa:1},
+  {t:'Portal La Reina',mail:'portallareina@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'porta2026',activa:1},
+  {t:'Mall Plaza Los Dominicos',mail:'malldominicos@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'malld2026',activa:1},
+  {t:'Subcentro Metro Escuela Militar',mail:'subcentroemilitar@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2025-10-13',pass:'subce2026',activa:1},
+  {t:'Lider La Reina',mail:'liderlareina@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'2026-03-27',pass:'lider2026',activa:1},
+  {t:'Providencia 2',mail:'tprovidencia2@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'tprov2026',activa:1},
+  {t:'Panoramico',mail:'tpanoramico@tua.cl',s:'EDUARDO MIRANDA',z:'Santiago Oriente',apertura:'',pass:'tpano2026',activa:1},
+  {t:'Jumbo Viña',mail:'tuajvina@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'',pass:'tuajv2026',activa:1},
+  {t:'Lider Paseo Viña',mail:'paseovina@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'',pass:'paseo2026',activa:1},
+  {t:'Jumbo Valparaiso',mail:'jvalparaiso@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'',pass:'jvalp2026',activa:1},
+  {t:'Portal Belloto',mail:'portalbelloto@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'',pass:'porta2026',activa:1},
+  {t:'Jumbo Quillota',mail:'jquillota@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2023-06-23',pass:'jquil2026',activa:1},
+  {t:'Espacio Urbano Viña del Mar',mail:'euvina@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-05-07',pass:'euvin2026',activa:1},
+  {t:'Viña Centro (2)',mail:'vinacentro2@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-05-23',pass:'vinac2026',activa:1},
+  {t:'Jumbo Los Andes',mail:'jlosandes@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2024-01-06',pass:'jlosa2026',activa:1},
+  {t:'Tottus La Calera',mail:'tottuslacalera@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-04-29',pass:'tottu2026',activa:1},
+  {t:'Mall Marina',mail:'mallmarina2@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-10-10',pass:'mallm2026',activa:1},
+  {t:'Antiage Mall Marina Arauco',mail:'antiagemmarina@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-12-24',pass:'antia2026',activa:1},
+  {t:'Tottus Buin',mail:'ttbuin@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2024-06-05',pass:'ttbui2026',activa:1},
+  {t:'Mall Plaza Sur 2',mail:'plazasur2@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2024-12-20',pass:'plaza2026',activa:1},
+  {t:'Espacio Urbano Melipilla',mail:'eumelipilla@tua.cl',s:'KAREN VALLADARES',z:'Quinta Región',apertura:'2025-08-23',pass:'eumel2026',activa:1},
+  {t:'Arica',mail:'arica@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'arica2026',activa:1},
+  {t:'Mall Plaza Copiapo',mail:'mallcopiapo@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'mallc2026',activa:1},
+  {t:'Jumbo Angamos Antofagasta',mail:'jangamos@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'janga2026',activa:1},
+  {t:'Lider Plaza Arica',mail:'liderplazaarica@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'lider2026',activa:1},
+  {t:'Mall  Zofri',mail:'mallzofri@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'mallz2026',activa:1},
+  {t:'Jumbo Calama',mail:'jcalama@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'jcala2026',activa:1},
+  {t:'Tottus Mall Plaza Antofagasta',mail:'ttmpantofagasta@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2024-05-09',pass:'ttmpa2026',activa:1},
+  {t:'Parque Arauco Antofagasta',mail:'tmaantofagasta@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2024-07-26',pass:'tmaan2026',activa:1},
+  {t:'Iquique Centro',mail:'iquiquecentro@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2024-12-23',pass:'iquiq2026',activa:1},
+  {t:'Mall Plaza Calama',mail:'mpcalama@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2025-12-23',pass:'mpcal2026',activa:1},
+  {t:'Jumbo Copiapó',mail:'jcopiapo@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2026-01-09',pass:'jcopi2026',activa:1},
+  {t:'Lider La Serena',mail:'tualiderserena@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'tuali2026',activa:1},
+  {t:'Mall Plaza La Serena',mail:'malllaserena@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2023-12-14',pass:'malll2026',activa:1},
+  {t:'Mall Vivo Coquimbo',mail:'vivocoquimbo@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'',pass:'vivoc2026',activa:1},
+  {t:'Antiage Mall Vivo Coquimbo',mail:'antiagevivocoquimbo@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'2026-01-20',pass:'antia2026',activa:1},
+  {t:'Jumbo Antofagasta Punto Encuentro',mail:'jantofagasta@tua.cl',s:'MARIO VALDIVIA',z:'Norte',apertura:'PROXIMA',pass:'janto2026',activa:1},
+  {t:'Ahumada 1',mail:'tuaahumada@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tuaah2026',activa:1},
+  {t:'Ahumada 2',mail:'tuaahumada2@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tuaah2026',activa:1},
+  {t:'Esmeralda',mail:'esmeralda@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'esmer2026',activa:1},
+  {t:'San Antonio 1',mail:'sanantonio@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'sanan2026',activa:1},
+  {t:'San Antonio Centro 2',mail:'sanantonio2@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'sanan2026',activa:1},
+  {t:'Mall Vivo Centro',mail:'vivocentro@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'vivoc2026',activa:1},
+  {t:'Estado',mail:'tuaestado@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tuaes2026',activa:1},
+  {t:'Mall Barrio Independencia',mail:'independencia@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'indep2026',activa:1},
+  {t:'Tottus Nataniel Cox',mail:'tottusnataniel@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'2024-11-22',pass:'tottu2026',activa:1},
+  {t:'Metro Moneda',mail:'metromoneda@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'2024-12-19',pass:'metro2026',activa:1},
+  {t:'Pedro De Valdivia',mail:'tuapvaldivia@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tuapv2026',activa:1},
+  {t:'Providencia',mail:'tprovidencia@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tprov2026',activa:1},
+  {t:'Mall Arauco Estacion',mail:'tmallaraucoestacion@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tmall2026',activa:1},
+  {t:'Mall Arauco Estacion 2',mail:'tmallaraucoestacion2@tua.cl',s:'SOLEDAD YAÑEZ',z:'Santiago Centro',apertura:'',pass:'tmall2026',activa:1},
+  {t:'La Florida',mail:'laflorida@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'laflo2026',activa:1},
+  {t:'Modulo De Uñas MPvespucio',mail:'modulompv@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'modul2026',activa:1},
+  {t:'Modulo Plaza Vespucio',mail:'tmodulompv@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2024-02-28',pass:'tmodu2026',activa:1},
+  {t:'Mall Plaza Vespucio Lyfestile',mail:'mpvlifestyle@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2024-12-18',pass:'mpvli2026',activa:1},
+  {t:'Jumbo Puente Alto',mail:'tpuentealto@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'tpuen2026',activa:1},
+  {t:'Jumbo Elisa Correa',mail:'jecorrea@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2024-06-29',pass:'jecor2026',activa:1},
+  {t:'Santa Amalia',mail:'tsantamalia@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'tsant2026',activa:1},
+  {t:'Vivo Outlet Los Toros',mail:'vivooutletlostoros@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2026-01-24',pass:'vivoo2026',activa:1},
+  {t:'Mall Plaza Tobalaba 2',mail:'mptobalaba2@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2026-03-06',pass:'mptob2026',activa:1},
+  {t:'Irarrazaval',mail:'irarrazaval@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'irarr2026',activa:1},
+  {t:'Lider Suecia',mail:'tualidersuecia@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'tuali2026',activa:1},
+  {t:'Portal Ñuñoa',mail:'portalnunoa@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2024-05-21',pass:'porta2026',activa:1},
+  {t:'Mall Plaza Egaña',mail:'plazaegana@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'plaza2026',activa:1},
+  {t:'Jumbo Mall Florida Center',mail:'jumbofloridac@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'jumbo2026',activa:1},
+  {t:'Outlet',mail:'tuaoutlet@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'',pass:'tuaou2026',activa:1},
+  {t:'Antiage Mall Plaza Tobalaba',mail:'antiagemptobalaba@tua.cl',s:'CRISTOBAL AVILÉS',z:'Santiago Sur',apertura:'2026-05-20',pass:'antia2026',activa:1},
+  {t:'Gran Avenida',mail:'granavenida@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'grana2026',activa:1},
+  {t:'Portal El Llano',mail:'tuallano@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'tuall2026',activa:1},
+  {t:'Estacion Intermodal',mail:'intermodal@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'inter2026',activa:1},
+  {t:'Espacio Urbano  Gran Avenida',mail:'eugranavenida@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'2025-10-18',pass:'eugra2026',activa:1},
+  {t:'Mall Arauco Quilicura',mail:'mallquilicura@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'mallq2026',activa:1},
+  {t:'Buenaventura',mail:'buenaventura@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'buena2026',activa:1},
+  {t:'Jumbo Rancagua',mail:'trancagua@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'tranc2026',activa:1},
+  {t:'Vivo San Fernando',mail:'vivosanfernando@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'vivos2026',activa:1},
+  {t:'Curicó Centro',mail:'curico@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'curic2026',activa:1},
+  {t:'Jumbo Curicó',mail:'jumbocurico@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'jumbo2026',activa:1},
+  {t:'Talca Centro',mail:'talca@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'',pass:'talca2026',activa:1},
+  {t:'Linares',mail:'linares@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'2024-11-07',pass:'linar2026',activa:1},
+  {t:'Jumbo Talca',mail:'jtalca@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'2025-05-06',pass:'jtalc2026',activa:1},
+  {t:'Santa Cruz',mail:'santacruz@tua.cl',s:'IVANNA MENA',z:'Sur Centro',apertura:'2026-05-29',pass:'santa2026',activa:1},
+  {t:'Boulevard Mall Plaza El Trebol',mail:'concepcion@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'conce2026',activa:1},
+  {t:'Chillan',mail:'chillan@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'chill2026',activa:1},
+  {t:'Concepcion Centro',mail:'concepcioncentro@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'conce2026',activa:1},
+  {t:'Mall Plaza Trebol',mail:'malltrebol@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'mallt2026',activa:1},
+  {t:'Jumbo Portal Temuco',mail:'portaltemuco@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'porta2026',activa:1},
+  {t:'Jumbo Chillan',mail:'jchillan@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'jchil2026',activa:1},
+  {t:'Jumbo Portal Valdivia',mail:'portalvaldivia@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'porta2026',activa:1},
+  {t:'Jumbo Hualpén',mail:'jhualpen@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'jhual2026',activa:1},
+  {t:'Concepcion Centro 2',mail:'concecentro2@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2024-11-29',pass:'conce2026',activa:1},
+  {t:'Mall Marina Concepción',mail:'marinaconcepcion@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2024-12-14',pass:'marin2026',activa:1},
+  {t:'Mall Arauco Coronel',mail:'macoronel@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2025-02-27',pass:'macor2026',activa:1},
+  {t:'Temuco',mail:'temuco@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2025-07-08',pass:'temuc2026',activa:1},
+  {t:'Portal Talcahuano',mail:'ptalcahuano@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2025-09-22',pass:'ptalc2026',activa:1},
+  {t:'Mall Plaza Los Angeles',mail:'malllosangeles@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2025-12-30',pass:'malll2026',activa:1},
+  {t:'Vivo Outlet Chillán',mail:'vivooutletchillan@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2026-01-25',pass:'vivoo2026',activa:1},
+  {t:'Antiage Mall Plaza Trébol',mail:'antiagemptrebol@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2026-01-07',pass:'antia2026',activa:1},
+  {t:'Jumbo Portal Osorno',mail:'jposorno@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'jposo2026',activa:1},
+  {t:'Mall Paseo Costanera Puerto Montt',mail:'mallpuertomontt@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'mallp2026',activa:1},
+  {t:'Jumbo Puerto Montt',mail:'jumbo.ptomontt@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'jumbo2026',activa:1},
+  {t:'Mall Paseo Chiloe Castro',mail:'mallchiloe@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'',pass:'mallc2026',activa:1},
+  {t:'Espacio Urbano Punta Arenas',mail:'euparenas@tua.cl',s:'PATRICIA PEREZ',z:'Sur',apertura:'2025-08-26',pass:'eupar2026',activa:1}
+];
+
+// ============================================================
+// CONFIGURACIÓN DE NEGOCIO
+// ============================================================
+// Urgencia automática por tipo de requerimiento (NO editable por la tienda)
+const UAUTO = {
+  'Cortina metálica falla':'Crítica',
+  'Caja fuerte':'Crítica',
+  'Gaveta de dinero':'Crítica',
+  'Electricidad':'Alta',
+  'Vitrina (trizada, quebrada)':'Alta',
+  'Gasfitería':'Media',
+  'Mobiliario':'Media',
+  'Control de plagas (excepcional)':'Baja'
+};
+
+// SLA — plazos máximos por urgencia
+// Crítica: 48 hrs (2 días corridos) · Alta: 10 días hábiles · Media: 30 días hábiles · Baja: 60 días hábiles
+const SLA = {
+  'Crítica':{max:2, habiles:false, label:'48 hrs máximo'},
+  'Alta':{max:10, habiles:true, label:'7–10 días hábiles'},
+  'Media':{max:30, habiles:true, label:'15–30 días hábiles'},
+  'Baja':{max:60, habiles:true, label:'31–60 días hábiles'}
+};
+
+// Causas específicas cuando el tipo es Cortina metálica (lista cerrada)
+const CAUSAS_CORTINA = ['No abre','No cierra','Descarrilada','Motor con falla','Chapa / cerradura dañada','Mal uso apertura o cierre'];
+// Gestiones para el resto de tipos (lista cerrada)
+const GESTIONES = ['Cambio','Instalación','Limpieza','Mantención','Reparación'];
+
+const SUPERVISORES = ['MARIO VALDIVIA','EDUARDO MIRANDA','FERNANDO CARRASCO','KAREN VALLADARES','PATRICIA PEREZ','IVANNA MENA','CRISTOBAL AVILÉS','SOLEDAD YAÑEZ'];
+const ZONAS = ['Norte','Santiago Oriente','Santiago Poniente','Quinta Región','Sur','Sur Centro','Santiago Sur','Santiago Centro'];
+
+const UO = {Crítica:0,Alta:1,Media:2,Baja:3};
+const MAIL_OPS = 'operacionestua20@gmail.com';
+const CORREOS_NOTIF = ['operacionestua20@gmail.com','vvega@gamaitaly.cl','nicol.yaraneft@gmail.com'];
+
+// ============================================================
+// FIREBASE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyCnIHp7O0Hcxc2qQHShqJD5pynnsb_4Ia4",
+  authDomain: "tua-operaciones.firebaseapp.com",
+  projectId: "tua-operaciones",
+  storageBucket: "tua-operaciones.firebasestorage.app",
+  messagingSenderId: "822224402523",
+  appId: "1:822224402523:web:0eceb38871ef42343a277e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ESTADO_REF = db.collection('tua').doc('estado');
+const FOTOS_COL = db.collection('tua_fotos'); // fotos por ticket, separadas para no inflar el doc principal
+
+let fbListenerActivo=false;
+let tickets=[]; let tkId=1; let tiendasCache=null; let passSupsCache={};
+let sesion = localStorage.getItem('ses4_tua')||''; // '', 'ops', 'sup:NOMBRE', o correo de tienda
+let tiendaEditIdx=null; let editId=null;
+
+function iniciarSyncFirestore(onReady){
+  ESTADO_REF.onSnapshot(snap=>{
+    if(snap.exists){
+      const d=snap.data();
+      tickets=d.tickets||[]; tkId=d.tkId||1;
+      // Migración: si las tiendas guardadas no tienen correo (formato antiguo), reemplazar por la nómina nueva
+      if(d.tiendas && d.tiendas.length && d.tiendas[0].mail){ tiendasCache=d.tiendas; }
+      else { tiendasCache=TIENDAS_BASE.map(t=>({...t})); ESTADO_REF.update({tiendas:tiendasCache}); }
+      window.__ejsCache=d.ejs||{sid:'',tid:'',pk:''};
+      window.__passOpsCache=d.passOps||'ops2025';
+      passSupsCache=d.passSups||defaultPassSups();
+      if(!d.passSups) ESTADO_REF.update({passSups:passSupsCache});
+    } else {
+      tiendasCache=TIENDAS_BASE.map(t=>({...t}));
+      tickets=[]; tkId=1;
+      window.__ejsCache={sid:'',tid:'',pk:''};
+      window.__passOpsCache='ops2025';
+      passSupsCache=defaultPassSups();
+      ESTADO_REF.set({tickets:[],tkId:1,tiendas:tiendasCache,ejs:window.__ejsCache,passOps:'ops2025',passSups:passSupsCache});
+    }
+    if(!fbListenerActivo){fbListenerActivo=true;if(onReady)onReady();}
+    else refrescarVistaActual();
+  },err=>{
+    console.error('Firestore error:',err);
+    toast('⚠️ Sin conexión a la base de datos.');
+  });
+}
+
+// Contraseñas por defecto de supervisores: primer nombre en minúscula + 2026
+function defaultPassSups(){
+  const o={};
+  SUPERVISORES.forEach(s=>{ o[s]= s.split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') + '2026'; });
+  return o;
+}
+
+function refrescarVistaActual(){
+  const opsV=document.getElementById('vista-ops')?.style.display==='block';
+  const tV=document.getElementById('vista-tienda')?.style.display==='block';
+  if(opsV){
+    renderDash();
+    const s=document.querySelector('.sec.on')?.id;
+    if(s==='sec-tickets')filtrar();
+    if(s==='sec-kanban')renderKanban();
+    if(s==='sec-config')renderCfg();
+    if(s==='sec-reportes')renderRep();
+  }
+  if(tV && document.getElementById('t-panel-historial').style.display!=='none') renderMisTickets();
+}
+
+function getTiendas(){ return tiendasCache||TIENDAS_BASE.map(t=>({...t})); }
+async function saveTiendas(l){ tiendasCache=l; try{await ESTADO_REF.update({tiendas:l});}catch(e){console.error(e);toast('⚠️ Error al guardar.');} }
+async function saveTickets(){ try{await ESTADO_REF.update({tickets,tkId});}catch(e){console.error(e);toast('⚠️ Error al guardar.');} }
+
+async function crearTicketAtomico(builder){
+  let nuevo=null;
+  try{
+    await db.runTransaction(async tx=>{
+      const s=await tx.get(ESTADO_REF);
+      const d=s.data()||{};
+      const id=d.tkId||1;
+      nuevo=builder(id);
+      tx.update(ESTADO_REF,{tickets:[...(d.tickets||[]),nuevo],tkId:id+1});
+    });
+  }catch(e){console.error(e);toast('⚠️ Error al crear el ticket.');}
+  return nuevo;
+}
+
+function getEJS(){return window.__ejsCache||{sid:'',tid:'',pk:''};}
+async function setEJS(sid,tid,pk){window.__ejsCache={sid,tid,pk};try{await ESTADO_REF.update({ejs:{sid,tid,pk}});}catch(e){console.error(e);}}
+function ejsActivo(){const e=getEJS();return e.sid&&e.tid&&e.pk;}
+function getPassOps(){return window.__passOpsCache||'ops2025';}
+async function setPassOps(v){window.__passOpsCache=v;try{await ESTADO_REF.update({passOps:v});}catch(e){console.error(e);}}
+async function setPassSup(nombre,v){passSupsCache[nombre]=v;try{await ESTADO_REF.update({passSups:passSupsCache});}catch(e){console.error(e);}}
+
+// ============================================================
+// UTILS
+// ============================================================
+function hoy(){return new Date().toISOString().split('T')[0];}
+function ts(){const d=new Date();return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function cap(s){if(!s)return'';return s.toLowerCase().replace(/(?:^|\s|\/)\w/g,c=>c.toUpperCase());}
+function fmt(f){if(!f)return'—';const d=new Date(f+'T00:00:00');return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;}
+function bUrg(u){const m={Crítica:'u-c',Alta:'u-a',Media:'u-m',Baja:'u-b'};return `<span class="badge ${m[u]||''}"><span class="bdot"></span>${u}</span>`;}
+function bEst(e){const m={Abierto:'e-ab','En gestión':'e-eg',Finalizado:'e-fi'};return `<span class="badge ${m[e]||''}">${e}</span>`;}
+function bZona(z){const stgo=(z||'').toLowerCase().includes('santiago');return `<span class="badge ${stgo?'z-s':'z-r'}">${z||'—'}</span>`;}
+function bPresu(t){
+  if(t.est==='Finalizado') return '';
+  return t.presu&&t.presu>0
+    ? `<span class="badge p-ok">💰 Bajo presupuesto</span>`
+    : `<span class="badge p-pend">Pendiente de presupuesto</span>`;
+}
+function fmtCLP(n){return '$'+Number(n).toLocaleString('es-CL');}
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+function cerrar(id){document.getElementById(id).classList.remove('on');}
+
+// ============================================================
+// SLA — días hábiles y estado de plazo
+// ============================================================
+function diasCorridos(desdeISO){
+  return Math.floor((new Date(hoy())-new Date(desdeISO+'T00:00:00'))/(1000*60*60*24));
+}
+function diasHabiles(desdeISO){
+  const ini=new Date(desdeISO+'T00:00:00');const fin=new Date(hoy()+'T00:00:00');
+  let c=0;const d=new Date(ini);
+  while(d<fin){d.setDate(d.getDate()+1);const dow=d.getDay();if(dow!==0&&dow!==6)c++;}
+  return c;
+}
+// Devuelve {dias, max, pct, estado:'ok'|'warn'|'venc', label}
+function slaTicket(t){
+  const cfg=SLA[t.urg]||SLA['Media'];
+  const dias = cfg.habiles ? diasHabiles(t.fecha) : diasCorridos(t.fecha);
+  if(t.est==='Finalizado') return {dias,max:cfg.max,pct:0,estado:'fin',label:'Finalizado'};
+  const pct=dias/cfg.max;
+  let estado='ok', label='Dentro de plazo';
+  if(pct>=1){estado='venc';label='Plazo vencido';}
+  else if(pct>=0.75){estado='warn';label='Por vencer';}
+  return {dias,max:cfg.max,pct,estado,label,habiles:cfg.habiles};
+}
+function slaPill(t){
+  const s=slaTicket(t);
+  if(s.estado==='fin')return '';
+  const cls=s.estado==='venc'?'sla-venc':s.estado==='warn'?'sla-warn':'sla-ok';
+  const icon=s.estado==='venc'?'⚠️':s.estado==='warn'?'⏳':'✓';
+  return `<span class="sla-pill ${cls}">${icon} ${s.label} · ${s.dias}/${s.max} d${s.habiles?' háb.':''}</span>`;
+}
+function diasEnEstado(t){
+  // días desde la última entrada del historial (último cambio) — aprox del tiempo en el estado actual
+  if(!t.hist||!t.hist.length) return diasCorridos(t.fecha);
+  const ult=t.hist[t.hist.length-1].f; // formato dd/mm/yyyy hh:mm
+  const m=ult.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(!m) return diasCorridos(t.fecha);
+  return Math.max(0,Math.floor((new Date(hoy())-new Date(`${m[3]}-${m[2]}-${m[1]}T00:00:00`))/(1000*60*60*24)));
+}
+
+// ============================================================
+// GARANTÍA — 6 meses desde apertura
+// ============================================================
+function enGarantia(tiendaObj){
+  if(!tiendaObj||!tiendaObj.apertura) return false;
+  if(tiendaObj.apertura==='PROXIMA') return true;
+  const ap=new Date(tiendaObj.apertura+'T00:00:00');
+  const meses=(new Date()-ap)/(1000*60*60*24*30.44);
+  return meses<6;
+}
+function mesesRestGarantia(tiendaObj){
+  if(tiendaObj.apertura==='PROXIMA') return 6;
+  const ap=new Date(tiendaObj.apertura+'T00:00:00');
+  return Math.max(0,6-(new Date()-ap)/(1000*60*60*24*30.44));
+}
+
+// ============================================================
+// EMAILJS
+// ============================================================
+async function enviarNotificacion(tkt){
+  const e=getEJS();
+  if(!e.sid||!e.tid||!e.pk)return false;
+  try{
+    const msg=`NUEVO TICKET TUA — ${tkt.idStr}\n============================\nFecha: ${ts()}\nTienda: ${cap(tkt.tienda)}\nZona: ${tkt.zona}\nSupervisor: ${cap(tkt.sup)}\nTipo: ${tkt.tipo}\nGestión: ${tkt.gestion}\nUrgencia: ${tkt.urg} (${SLA[tkt.urg]?.label||''})\nOrigen: ${tkt.origen}\n\nDescripción:\n${tkt.desc||'Sin descripción'}\n\n---\nPlataforma TUA Operaciones.`;
+    emailjs.init(e.pk);
+    await Promise.all(CORREOS_NOTIF.map(c=>emailjs.send(e.sid,e.tid,{subject:`[${tkt.urg}] Nuevo ticket ${tkt.idStr} — ${cap(tkt.tienda)}`,mensaje:msg,to_email:c})));
+    return true;
+  }catch(err){console.warn('EmailJS:',err);return false;}
+}
+
+// ============================================================
+// LOGIN — 3 ROLES
+// ============================================================
+function ltab(tab){
+  document.querySelectorAll('.login-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.login-panel').forEach(p=>p.classList.remove('on'));
+  document.querySelector(`.login-tab[onclick="ltab('${tab}')"]`).classList.add('on');
+  document.getElementById('lp-'+tab).classList.add('on');
+}
+
+function loginTienda(){
+  const mail=document.getElementById('lt-mail').value.trim().toLowerCase();
+  const pass=document.getElementById('lt-pass').value;
+  const err=document.getElementById('lerr-t');
+  if(!mail){err.style.display='block';err.textContent='Ingresa el correo de tu tienda.';return;}
+  const TD=getTiendas();
+  const t=TD.find(x=>x.mail===mail&&x.activa!=0);
+  if(!t){err.style.display='block';err.textContent='Correo no registrado. Verifica con operaciones.';return;}
+  if(pass!==t.pass){err.style.display='block';err.textContent='Contraseña incorrecta.';return;}
+  err.style.display='none';
+  sesion=mail;
+  localStorage.setItem('ses4_tua',mail);
+  mostrarTienda(mail);
+}
+
+function loginSup(){
+  const nom=document.getElementById('ls-sup').value;
+  const pass=document.getElementById('ls-pass').value;
+  const err=document.getElementById('lerr-s');
+  if(!nom){err.style.display='block';err.textContent='Selecciona tu nombre.';return;}
+  if(pass!==passSupsCache[nom]){err.style.display='block';err.textContent='Contraseña incorrecta.';return;}
+  err.style.display='none';
+  sesion='sup:'+nom;
+  localStorage.setItem('ses4_tua',sesion);
+  mostrarOps();
+}
+
+function loginOps(){
+  const mail=document.getElementById('lo-mail').value.trim().toLowerCase();
+  const pass=document.getElementById('lo-pass').value;
+  const err=document.getElementById('lerr-o');
+  if(mail!==MAIL_OPS){err.style.display='block';err.textContent='Correo no autorizado.';return;}
+  if(pass!==getPassOps()){err.style.display='block';err.textContent='Contraseña incorrecta.';return;}
+  err.style.display='none';
+  sesion='ops';
+  localStorage.setItem('ses4_tua','ops');
+  mostrarOps();
+}
+
+function logout(){
+  sesion='';localStorage.removeItem('ses4_tua');
+  document.getElementById('vista-tienda').style.display='none';
+  document.getElementById('vista-ops').style.display='none';
+  document.getElementById('login').style.display='flex';
+  ['lt-pass','lo-pass','ls-pass'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['lerr-t','lerr-o','lerr-s'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});
+}
+
+// Rol actual
+function esSup(){return sesion.startsWith('sup:');}
+function supNombre(){return esSup()?sesion.slice(4):'';}
+function esOps(){return sesion==='ops';}
+// Tickets visibles según rol (supervisor solo ve sus tiendas)
+function visTickets(){
+  if(esSup()){const n=supNombre();return tickets.filter(t=>(t.sup||'').toUpperCase()===n);}
+  return tickets;
+}
+
+function poblarLoginSups(){
+  const sel=document.getElementById('ls-sup');
+  sel.innerHTML='<option value="">Selecciona tu nombre...</option>'+SUPERVISORES.map(s=>`<option value="${s}">${cap(s)}</option>`).join('');
+}
+
+// ============================================================
+// VISTA TIENDA
+// ============================================================
+function tiendaActual(){return getTiendas().find(x=>x.mail===sesion);}
+
+function mostrarTienda(mail){
+  document.getElementById('login').style.display='none';
+  document.getElementById('vista-tienda').style.display='block';
+  const t=tiendaActual();
+  document.getElementById('th-nom').innerHTML=`<em>${cap(t?t.t:mail)}</em>`;
+  // Garantía: banner + bloqueo del formulario
+  const gar=t&&enGarantia(t);
+  const banner=document.getElementById('gar-banner');
+  if(gar){
+    const meses=mesesRestGarantia(t).toFixed(1);
+    banner.style.display='block';
+    document.getElementById('gar-detalle').innerHTML=`Tu tienda se encuentra dentro del período de garantía de instalación (quedan ~${meses} meses). Durante este período <strong>no se generan tickets por esta plataforma</strong>: cualquier problema debe gestionarse directamente con tu <strong>supervisor${t.s?' ('+cap(t.s)+')':''}</strong>, quien coordinará con la constructora.`;
+    document.getElementById('t-panel-nuevo').style.display='none';
+    document.getElementById('ttab-nuevo').style.display='none';
+    tCambiarTab('historial');
+  }else{
+    banner.style.display='none';
+    document.getElementById('ttab-nuevo').style.display='block';
+    tReset();
+    tCambiarTab('nuevo');
+  }
+  window.scrollTo(0,0);
+}
+
+function tCambiarTab(tab){
+  const t=tiendaActual();
+  const gar=t&&enGarantia(t);
+  const esNuevo=tab==='nuevo'&&!gar;
+  document.getElementById('t-panel-nuevo').style.display=esNuevo?'block':'none';
+  document.getElementById('t-panel-historial').style.display=esNuevo?'none':'block';
+  document.getElementById('ttab-nuevo').classList.toggle('on',esNuevo);
+  document.getElementById('ttab-historial').classList.toggle('on',!esNuevo);
+  if(!esNuevo)renderMisTickets();
+}
+
+// Al elegir tipo: cargar gestiones/causas y asignar urgencia automática
+function tTipoChange(){
+  const tipo=document.getElementById('t-tipo').value;
+  const sel=document.getElementById('t-gestion');
+  const lbl=document.getElementById('lbl-gestion');
+  if(tipo==='Cortina metálica falla'){
+    lbl.innerHTML='Causa de la falla <span class="r">*</span>';
+    sel.innerHTML='<option value="">Seleccionar causa...</option>'+CAUSAS_CORTINA.map(c=>`<option>${c}</option>`).join('');
+  }else{
+    lbl.innerHTML='Tipo de gestión <span class="r">*</span>';
+    sel.innerHTML='<option value="">Seleccionar...</option>'+GESTIONES.map(g=>`<option>${g}</option>`).join('');
+  }
+  // Urgencia automática — mostrar tarjeta informativa (no editable)
+  if(tipo){
+    const u=UAUTO[tipo]||'Media';
+    const cfg=SLA[u];
+    const colores={Crítica:['var(--vs)','var(--vc)','var(--vb)'],Alta:['var(--as)','var(--ac)','var(--ab)'],Media:['var(--ms)','var(--mc)','var(--mb)'],Baja:['var(--bs)','var(--bc)','var(--bb)']};
+    const [bg,c,b]=colores[u];
+    document.getElementById('t-card-urg').style.display='block';
+    document.getElementById('t-urg-auto').style.cssText=`background:${bg};color:${c};border:1.5px solid ${b};border-radius:8px;padding:14px;text-align:center;`;
+    document.getElementById('t-urg-auto').innerHTML=`<div class="ubadge">${u==='Crítica'?'🔴':u==='Alta'?'🟠':u==='Media'?'🟡':'🟢'} Urgencia ${u}</div><div class="uplazo">Plazo de resolución: ${cfg.label}</div>`;
+  }else{
+    document.getElementById('t-card-urg').style.display='none';
+  }
+  tPaso();
+}
+
+function tPaso(){
+  const tipo=document.getElementById('t-tipo').value;
+  const gest=document.getElementById('t-gestion').value;
+  const listo=tipo&&gest;
+  document.getElementById('t-card-det').style.display=listo?'block':'none';
+  document.getElementById('t-enviar-wrap').style.display=listo?'block':'none';
+  const ps=(id,cls)=>{document.getElementById(id).className='paso '+cls;};
+  ps('ps1',listo?'ok':'activo');
+  ps('ps2',listo?(document.getElementById('t-desc').value.trim()?'ok':'activo'):'');
+  ps('ps3',listo&&document.getElementById('t-desc').value.trim()?'activo':'');
+}
+
+// FOTOS — compresión client-side y almacenamiento en colección separada
+let fotosSel=[]; // dataURLs comprimidas
+function tFotosSel(input){
+  const files=Array.from(input.files).slice(0,2-fotosSel.length);
+  files.forEach(f=>{
+    if(!f.type.startsWith('image/'))return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        const MAX=720;
+        let w=img.width,h=img.height;
+        if(w>h&&w>MAX){h=h*MAX/w;w=MAX;}else if(h>MAX){w=w*MAX/h;h=MAX;}
+        const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+        cv.getContext('2d').drawImage(img,0,0,w,h);
+        const data=cv.toDataURL('image/jpeg',0.55);
+        if(fotosSel.length<2){fotosSel.push(data);renderFotosPrev();}
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(f);
+  });
+  input.value='';
+}
+function renderFotosPrev(){
+  document.getElementById('t-fotos-prev').innerHTML=fotosSel.map((d,i)=>`
+    <div class="foto-wrap"><img class="foto-mini" src="${d}"><button class="foto-x" onclick="quitarFoto(${i})">✕</button></div>`).join('');
+}
+function quitarFoto(i){fotosSel.splice(i,1);renderFotosPrev();}
+
+async function tEnviar(){
+  const tipo=document.getElementById('t-tipo').value;
+  const gest=document.getElementById('t-gestion').value;
+  const desc=document.getElementById('t-desc').value.trim();
+  const el=document.getElementById('al-t');
+  if(!tipo||!gest){el.className='alerta err';el.textContent='Completa el tipo y la gestión/causa.';el.style.display='block';return;}
+  if(!desc){el.className='alerta err';el.textContent='Describe el problema.';el.style.display='block';return;}
+  el.style.display='none';
+
+  const t=tiendaActual();
+  if(!t){el.className='alerta err';el.textContent='Sesión inválida. Vuelve a entrar.';el.style.display='block';return;}
+  if(enGarantia(t)){el.className='alerta err';el.textContent='Tu tienda está en garantía: gestiona con tu supervisor.';el.style.display='block';return;}
+
+  const btn=document.getElementById('btn-t-env');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>Enviando...';
+
+  const now=new Date();
+  const anio=now.getFullYear(), mes=now.getMonth()+1;
+  const urg=UAUTO[tipo]||'Media';
+  const nFotos=fotosSel.length;
+
+  const tkt=await crearTicketAtomico(id=>({
+    id, idStr:`TUA-${anio}-${String(id).padStart(4,'0')}`,
+    tienda:t.t, mail:t.mail, sup:t.s, zona:t.z,
+    tipo, gestion:gest, urg, est:'Abierto',
+    mes, anio, fecha:hoy(), fplan:'', prov:'', desc,
+    presu:0, fotos:nFotos,
+    origen:'Tienda',
+    hist:[{f:ts(),a:`Ticket creado por tienda ${cap(t.t)}`,u:t.mail}]
+  }));
+
+  if(!tkt){btn.disabled=false;btn.innerHTML='Enviar caso a operaciones';el.className='alerta err';el.textContent='No se pudo crear el ticket. Intenta de nuevo.';el.style.display='block';return;}
+
+  // Guardar fotos en colección separada (no infla el doc principal)
+  if(nFotos){
+    try{await FOTOS_COL.doc(tkt.idStr).set({fotos:fotosSel});}catch(e){console.warn('Fotos:',e);}
+  }
+
+  const correoOk=await enviarNotificacion(tkt);
+  btn.disabled=false;btn.innerHTML='Enviar caso a operaciones';
+
+  const cfg=SLA[urg];
+  document.getElementById('t-panel-nuevo').style.display='none';
+  document.getElementById('t-exito').style.display='block';
+  document.getElementById('t-exito-det').innerHTML=`
+    <div><strong>N° Ticket:</strong> ${tkt.idStr}</div>
+    <div><strong>Tipo:</strong> ${tipo} — ${gest}</div>
+    <div><strong>Urgencia:</strong> ${urg}</div>
+    <div><strong>Plazo de resolución:</strong> ${cfg.label}</div>
+    ${nFotos?`<div><strong>Fotos adjuntas:</strong> ${nFotos}</div>`:''}
+    <div style="margin-top:6px;font-size:11px;color:var(--txt3);">${correoOk?'✉️ Notificación enviada a operaciones':'📋 Registrado en la plataforma'}</div>`;
+  window.scrollTo(0,0);
+}
+
+function tReset(){
+  ['t-tipo','t-gestion','t-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  fotosSel=[];renderFotosPrev();
+  document.getElementById('al-t').style.display='none';
+  document.getElementById('t-card-urg').style.display='none';
+  document.getElementById('t-card-det').style.display='none';
+  document.getElementById('t-enviar-wrap').style.display='none';
+  document.getElementById('t-panel-nuevo').style.display='block';
+  document.getElementById('t-exito').style.display='none';
+  document.getElementById('t-gestion').innerHTML='<option value="">Seleccionar...</option>';
+  tPaso();
+  window.scrollTo(0,0);
+}
+
+// MIS TICKETS — estado, días, urgencia, SLA, bitácora completa
+function renderMisTickets(){
+  const el=document.getElementById('t-mis-tickets');
+  if(!el)return;
+  const t=tiendaActual();
+  const mis=tickets.filter(x=>x.mail===sesion||(t&&x.tienda===t.t)).sort((a,b)=>b.id-a.id);
+  if(!mis.length){el.innerHTML=`<div style="text-align:center;padding:2.5rem 1rem;color:var(--txt3);font-size:13px;"><div style="font-size:30px;margin-bottom:8px;opacity:.3;">📋</div>Aún no has ingresado ningún caso.</div>`;return;}
+  const colEst={Abierto:{bg:'var(--as2)',c:'var(--ab2)'},'En gestión':{bg:'var(--gs)',c:'var(--gc)'},Finalizado:{bg:'var(--bs)',c:'var(--bc)'}};
+  el.innerHTML=mis.map(x=>{
+    const ce=colEst[x.est]||{bg:'var(--sur2)',c:'var(--txt2)'};
+    const sla=slaTicket(x);
+    const dias=diasCorridos(x.fecha);
+    const dEstado=diasEnEstado(x);
+    const alertaVenc = sla.estado==='venc' ? `<div style="background:var(--vs);border:1px solid var(--vb);color:var(--vc);border-radius:7px;padding:8px 11px;font-size:12px;font-weight:600;margin-top:8px;">⚠️ Este ticket superó su plazo máximo de resolución (${sla.max} días${sla.habiles?' hábiles':''}). Operaciones está al tanto.</div>` : sla.estado==='warn' ? `<div style="background:var(--ms);border:1px solid var(--mb);color:var(--mc);border-radius:7px;padding:8px 11px;font-size:12px;font-weight:600;margin-top:8px;">⏳ Este ticket está próximo a vencer su plazo.</div>` : '';
+    return `<div style="background:var(--sur);border:.5px solid var(--bor);border-radius:var(--r);padding:1rem 1.1rem;margin-bottom:.75rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px;">
+        <div>
+          <div style="font-size:10px;font-family:monospace;color:var(--txt3);margin-bottom:2px;">${x.idStr}</div>
+          <div style="font-size:14px;font-weight:700;">${x.tipo}</div>
+          <div style="font-size:12px;color:var(--txt2);">${x.gestion}</div>
+        </div>
+        <div style="text-align:right;">
+          <span style="background:${ce.bg};color:${ce.c};border:1px solid ${ce.c}33;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;">${x.est}</span>
+          <div style="margin-top:4px;">${bUrg(x.urg)}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--txt3);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px;">
+        <span>📅 Creado: ${fmt(x.fecha)} (hace ${dias} día${dias!==1?'s':''})</span>
+        <span>⏱️ ${dEstado} día${dEstado!==1?'s':''} en estado "${x.est}"</span>
+        ${x.fplan?`<span>🔧 Planificado: ${fmt(x.fplan)}</span>`:''}
+        ${x.prov?`<span>👷 ${x.prov}</span>`:''}
+      </div>
+      <div style="margin-bottom:6px;">${slaPill(x)} ${bPresu(x)}</div>
+      ${x.desc?`<div style="font-size:12px;color:var(--txt2);background:var(--sur2);padding:7px 10px;border-radius:6px;line-height:1.5;margin-bottom:6px;">${x.desc}</div>`:''}
+      ${alertaVenc}
+      <details style="margin-top:8px;">
+        <summary style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);cursor:pointer;">Bitácora del ticket (${(x.hist||[]).length})</summary>
+        <div style="margin-top:8px;">
+          ${(x.hist||[]).map(h=>`<div class="hist-row"><div class="hdot"></div><div><div class="htxt">${h.a}</div><div class="hfecha">${h.f} · ${h.u}</div></div></div>`).join('')}
+        </div>
+      </details>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// OPS — MOSTRAR VISTA (ops o supervisor)
+// ============================================================
+let filtroCriticosActivo=false;
+
+function mostrarOps(){
+  document.getElementById('login').style.display='none';
+  document.getElementById('vista-ops').style.display='block';
+  // Identidad en sidebar
+  if(esSup()){
+    const n=supNombre();
+    document.getElementById('sb-av').textContent=n.split(' ').map(p=>p[0]).join('').slice(0,2);
+    document.getElementById('sb-uname').innerHTML=cap(n)+'<br><span style="font-size:9px;opacity:.7;">Supervisor — solo lectura</span>';
+    document.querySelectorAll('.solo-ops').forEach(e=>e.style.display='none');
+    document.getElementById('dash-sub').textContent='Tickets de tus tiendas — '+cap(n);
+  }else{
+    document.getElementById('sb-av').textContent='OT';
+    document.getElementById('sb-uname').innerHTML='operacionestua20<br>@gmail.com';
+    document.querySelectorAll('.solo-ops').forEach(e=>e.style.display='');
+    document.getElementById('dash-sub').textContent='Estado operacional en tiempo real';
+  }
+  poblarN();poblarFiltros();
+  renderDash();ir('dashboard');
+}
+
+function poblarFiltros(){
+  const fz=document.getElementById('f-zona');
+  fz.innerHTML='<option value="">Toda zona</option>'+ZONAS.map(z=>`<option>${z}</option>`).join('');
+  const fs=document.getElementById('f-sup');
+  fs.innerHTML='<option value="">Todos los supervisores</option>'+SUPERVISORES.map(s=>`<option value="${s}">${cap(s)}</option>`).join('');
+  if(esSup())fs.style.display='none';else fs.style.display='';
+}
+
+// ============================================================
+// OPS — NAVEGACIÓN
+// ============================================================
+function ir(sec){
+  // Supervisores no acceden a secciones exclusivas de ops
+  if(esSup()&&['nuevo','importar','config'].includes(sec))sec='dashboard';
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('on'));
+  document.querySelectorAll('.mob-nav-item').forEach(n=>n.classList.remove('on'));
+  document.getElementById('sec-'+sec).classList.add('on');
+  const mapa={dashboard:0,tickets:1,kanban:2,nuevo:3,importar:4,reportes:5,config:6};
+  document.querySelectorAll('.sb-item')[mapa[sec]??0]?.classList.add('on');
+  const mobM={dashboard:0,tickets:1,nuevo:2,kanban:3,config:4};
+  document.querySelectorAll('.mob-nav-item')[mobM[sec]??0]?.classList.add('on');
+  if(sec==='tickets')filtrar();
+  if(sec==='kanban')renderKanban();
+  if(sec==='dashboard')renderDash();
+  if(sec==='reportes')renderRep();
+  if(sec==='config')renderCfg();
+}
+
+// ============================================================
+// OPS — DASHBOARD (críticos primero + clickeable)
+// ============================================================
+function toggleCriticos(){
+  filtroCriticosActivo=!filtroCriticosActivo;
+  renderDash();
+}
+
+function renderDash(){
+  const mes=document.getElementById('dash-mes')?.value||'';
+  const base=visTickets();
+  let L=mes?base.filter(t=>t.mes==mes):base;
+  const ab=L.filter(t=>t.est==='Abierto').length;
+  const eg=L.filter(t=>t.est==='En gestión').length;
+  const fi=L.filter(t=>t.est==='Finalizado').length;
+  const criticos=L.filter(t=>t.urg==='Crítica'&&t.est!=='Finalizado');
+  const vencidos=L.filter(t=>slaTicket(t).estado==='venc');
+
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi clickable" onclick="toggleCriticos()" style="${criticos.length?'border-color:var(--vc);background:var(--vs);':''}">
+      <div class="kpi-l" style="${criticos.length?'color:var(--vc);':''}">🔴 Críticos activos ${filtroCriticosActivo?'▲':'▼'}</div>
+      <div class="kpi-v" style="color:var(--vc)">${criticos.length}</div>
+    </div>
+    <div class="kpi"><div class="kpi-l">Plazos vencidos</div><div class="kpi-v" style="color:${vencidos.length?'var(--vc)':'var(--bc)'}">${vencidos.length}</div></div>
+    <div class="kpi"><div class="kpi-l">Total</div><div class="kpi-v">${L.length}</div></div>
+    <div class="kpi"><div class="kpi-l">Abiertos</div><div class="kpi-v" style="color:var(--ab2)">${ab}</div></div>
+    <div class="kpi"><div class="kpi-l">En gestión</div><div class="kpi-v" style="color:var(--gc)">${eg}</div></div>
+    <div class="kpi"><div class="kpi-l">Finalizados</div><div class="kpi-v" style="color:var(--bc)">${fi}</div></div>`;
+
+  // LISTADO CRÍTICOS EXPANDIBLE (al hacer clic en el KPI)
+  const cardCrit=document.getElementById('card-criticos-lista');
+  if(filtroCriticosActivo&&criticos.length){
+    cardCrit.style.display='block';
+    document.getElementById('d-criticos-lista').innerHTML=criticos
+      .sort((a,b)=>a.fecha.localeCompare(b.fecha))
+      .map(t=>{
+        const d=diasCorridos(t.fecha);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--vb);cursor:pointer;" onclick="verTkt(${t.id})">
+          <div><div style="font-size:12px;font-weight:600;">${cap(t.tienda)}</div><div style="font-size:11px;color:var(--txt3);">${t.tipo} · ${t.gestion} · ${t.idStr}</div></div>
+          <div style="text-align:right;">${bEst(t.est)}<div style="font-size:10px;color:var(--vc);font-weight:700;margin-top:3px;">${d} día${d!==1?'s':''} abierto · ${slaPill(t)?'':''}${slaTicket(t).estado==='venc'?'VENCIDO':''}</div></div>
+        </div>`;
+      }).join('');
+  }else{cardCrit.style.display='none';}
+
+  // PLAZOS VENCIDOS SLA
+  const cardV=document.getElementById('card-vencidos');
+  const elV=document.getElementById('d-vencidos');
+  if(vencidos.length){
+    cardV.style.display='block';
+    elV.innerHTML=vencidos.sort((a,b)=>UO[a.urg]-UO[b.urg]).map(t=>{
+      const s=slaTicket(t);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--vb);cursor:pointer;" onclick="verTkt(${t.id})">
+        <div><div style="font-size:12px;font-weight:600;">${cap(t.tienda)}</div><div style="font-size:11px;color:var(--txt3);">${t.tipo} · ${t.idStr}</div></div>
+        <div style="text-align:right;">${bUrg(t.urg)}<div style="font-size:10px;color:var(--vc);font-weight:700;margin-top:3px;">${s.dias}/${s.max} días${s.habiles?' hábiles':''} — VENCIDO</div></div>
+      </div>`;
+    }).join('');
+  }else{cardV.style.display='none';}
+
+  // CRÍTICOS Y ALTOS
+  const urg=L.filter(t=>['Crítica','Alta'].includes(t.urg)&&t.est!=='Finalizado').sort((a,b)=>UO[a.urg]-UO[b.urg]||a.fecha.localeCompare(b.fecha)).slice(0,6);
+  document.getElementById('d-urgentes').innerHTML=urg.length?urg.map(t=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--bor);cursor:pointer;" onclick="verTkt(${t.id})">
+      <div><div style="font-size:12px;font-weight:600;">${cap(t.tienda)}</div><div style="font-size:11px;color:var(--txt3);">${t.tipo} · ${t.gestion}</div></div>
+      ${bUrg(t.urg)}
+    </div>`).join(''):`<div class="vacio"><i>✅</i>Sin críticos activos</div>`;
+
+  // ÚLTIMOS INGRESADOS — con estado, días abierto y urgencia
+  const rec=[...base].reverse().slice(0,6);
+  document.getElementById('d-recientes').innerHTML=rec.map(t=>{
+    const d=diasCorridos(t.fecha);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--bor);cursor:pointer;" onclick="verTkt(${t.id})">
+      <div>
+        <div style="font-size:12px;font-weight:600;">${cap(t.tienda)}</div>
+        <div style="font-size:11px;color:var(--txt3);">${t.idStr} · ${t.origen} · ${d} día${d!==1?'s':''} desde ingreso</div>
+      </div>
+      <div style="text-align:right;">${bEst(t.est)}<div style="margin-top:3px;">${bUrg(t.urg)}</div></div>
+    </div>`;
+  }).join('')||`<div class="vacio"><i>📋</i>Sin tickets</div>`;
+
+  // POR TIPO
+  const tipos={};L.forEach(t=>{tipos[t.tipo]=(tipos[t.tipo]||0)+1;});
+  const tc=['var(--vc)','var(--ab2)','var(--bc)','var(--ac)','var(--gc)','#0d9488','var(--mc)','#b5651d'];
+  document.getElementById('d-tipos').innerHTML=Object.entries(tipos).map(([t,c],i)=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 9px;background:var(--sur2);border-radius:7px;flex:1;min-width:120px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:${tc[i%tc.length]};flex-shrink:0;"></div>
+      <div><div style="font-size:13px;font-weight:700;">${c}</div><div style="font-size:10px;color:var(--txt3);">${t}</div></div>
+    </div>`).join('')||'<span style="font-size:13px;color:var(--txt3);">Sin datos</span>';
+
+  // POR SUPERVISOR
+  const sups={};L.forEach(t=>{sups[t.sup]=(sups[t.sup]||0)+1;});
+  document.getElementById('d-sups').innerHTML=Object.entries(sups).map(([s,c])=>`
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 9px;background:var(--sur2);border-radius:7px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--ab2);flex-shrink:0;"></div>
+      <div><div style="font-size:13px;font-weight:700;">${c}</div><div style="font-size:10px;color:var(--txt3);">${cap(s)}</div></div>
+    </div>`).join('')||'<span style="font-size:13px;color:var(--txt3);">Sin datos</span>';
+}
+
+// ============================================================
+// OPS — TABLA
+// ============================================================
+function filtrar(){
+  const zona=document.getElementById('f-zona').value;
+  const tipo=document.getElementById('f-tipo').value;
+  const urg=document.getElementById('f-urg').value;
+  const est=document.getElementById('f-est').value;
+  const presu=document.getElementById('f-presu').value;
+  const sup=document.getElementById('f-sup').value;
+  const bus=document.getElementById('f-bus').value.toLowerCase();
+  const L=visTickets().filter(t=>
+    (!zona||t.zona===zona)&&(!tipo||t.tipo===tipo)&&(!urg||t.urg===urg)&&
+    (!est||t.est===est)&&(!sup||(t.sup||'').toUpperCase()===sup)&&
+    (!presu||(presu==='ok'?(t.presu>0):(!t.presu||t.presu==0)))&&
+    (!bus||t.tienda.toLowerCase().includes(bus)||t.idStr.toLowerCase().includes(bus))
+  ).sort((a,b)=>UO[a.urg]-UO[b.urg]||a.fecha.localeCompare(b.fecha));
+  document.getElementById('tkt-count').textContent=L.length+' tickets';
+  const tb=document.getElementById('tbody');
+  if(!L.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;padding:2rem;color:var(--txt3);">Sin tickets</td></tr>';return;}
+  const soloVer=esSup();
+  tb.innerHTML=L.map(t=>`
+    <tr onclick="verTkt(${t.id})">
+      <td class="tid">${t.idStr}</td>
+      <td><div class="ttit">${cap(t.tienda)}</div><div class="tsub">${cap(t.sup)}</div></td>
+      <td style="font-size:12px;">${t.tipo}<div class="tsub">${t.gestion}</div></td>
+      <td>${bUrg(t.urg)}</td>
+      <td>${slaPill(t)||'—'}</td>
+      <td>${bPresu(t)||(t.presu>0?fmtCLP(t.presu):'—')}</td>
+      <td>${bZona(t.zona)}</td>
+      <td>${soloVer?bEst(t.est):`<select style="font-size:11px;padding:3px 7px;border:1px solid var(--bor);border-radius:5px;background:var(--sur);" onchange="cambEst(${t.id},this.value);event.stopPropagation();" onclick="event.stopPropagation();">
+        <option ${t.est==='Abierto'?'selected':''}>Abierto</option>
+        <option ${t.est==='En gestión'?'selected':''}>En gestión</option>
+        <option ${t.est==='Finalizado'?'selected':''}>Finalizado</option>
+      </select>`}</td>
+      <td style="font-size:11px;color:var(--txt3);">${fmt(t.fecha)}</td>
+      <td><button class="btn btn-s btn-sm" onclick="event.stopPropagation();verTkt(${t.id})">Ver</button></td>
+    </tr>`).join('');
+}
+
+function cambEst(id,val){
+  if(esSup())return;
+  const t=tickets.find(x=>x.id===id);
+  if(t){t.hist.push({f:ts(),a:`Estatus → ${val}`,u:'operacionestua20'});t.est=val;saveTickets();renderDash();}
+}
+
+// ============================================================
+// OPS — KANBAN
+// ============================================================
+function renderKanban(){
+  const cols=['Abierto','En gestión','Finalizado'];
+  const cc={Abierto:'var(--ab2)','En gestión':'var(--gc)',Finalizado:'var(--bc)'};
+  document.getElementById('kanban').innerHTML=cols.map(col=>{
+    const L=visTickets().filter(t=>t.est===col).sort((a,b)=>UO[a.urg]-UO[b.urg]);
+    return `<div class="k-col">
+      <div class="k-hdr" style="color:${cc[col]};"><span>${col}</span><span class="k-cnt" style="background:${cc[col]}22;color:${cc[col]};">${L.length}</span></div>
+      ${L.length?L.map(t=>`<div class="tkcard" onclick="verTkt(${t.id})">
+        <div class="tkid">${t.idStr}</div><div class="tktit">${cap(t.tienda)}</div>
+        <div class="tksub">${t.tipo} · ${t.gestion}</div>
+        <div class="tkbadges">${bUrg(t.urg)}${slaPill(t)}</div>
+      </div>`).join(''):`<div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px;">Sin tickets</div>`}
+    </div>`;}).join('');
+}
+
+// ============================================================
+// OPS — DETALLE TICKET (con presupuesto y fotos)
+// ============================================================
+function verTkt(id){
+  const t=tickets.find(x=>x.id===id);if(!t)return;
+  editId=id;
+  const soloVer=esSup();
+  document.querySelectorAll('#modal-tkt .solo-ops').forEach(e=>e.style.display=soloVer?'none':'');
+  document.getElementById('mt-id-tit').innerHTML=`<span style="font-family:monospace;color:var(--txt3);font-size:12px;">${t.idStr}</span><span style="font-size:15px;font-weight:700;margin-left:8px;">${cap(t.tienda)}</span>`;
+  const campo=(l,v)=>`<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:2px;">${l}</div>${v}</div>`;
+  const sla=slaTicket(t);
+  document.getElementById('mt-det').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+      ${campo('Tienda',`<div style="font-weight:600;">${cap(t.tienda)}</div>`)}
+      ${campo('Zona',bZona(t.zona))}
+      ${campo('Supervisor',cap(t.sup))}
+      ${campo('Correo tienda',t.mail||'—')}
+      ${campo('Tipo',t.tipo)}
+      ${campo('Gestión / Causa',t.gestion)}
+      ${campo('Urgencia',bUrg(t.urg))}
+      ${campo('Estatus',bEst(t.est))}
+      ${campo('SLA',slaPill(t)||'Finalizado')}
+      ${campo('Presupuesto',t.presu>0?`${fmtCLP(t.presu)} <span class="badge p-ok">Bajo presupuesto</span>`:`<span class="badge p-pend">Pendiente de presupuesto</span>`)}
+      ${campo('Fecha ingreso',fmt(t.fecha)+` (hace ${diasCorridos(t.fecha)} días)`)}
+      ${t.fplan?campo('Fecha planificada',fmt(t.fplan)):''}
+      ${t.prov?campo('Proveedor',t.prov):''}
+      ${campo('Origen',t.origen)}
+      <div style="grid-column:1/-1;"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:4px;">Descripción</div><div style="background:var(--sur2);padding:9px 12px;border-radius:7px;line-height:1.5;">${t.desc||'Sin descripción'}</div></div>
+      <div style="grid-column:1/-1;" id="mt-fotos-wrap"></div>
+    </div>`;
+  // Cargar fotos desde la colección separada
+  const fw=document.getElementById('mt-fotos-wrap');
+  if(t.fotos&&t.fotos>0){
+    fw.innerHTML='<div style="font-size:11px;color:var(--txt3);">Cargando fotos...</div>';
+    FOTOS_COL.doc(t.idStr).get().then(s=>{
+      if(s.exists&&s.data().fotos){
+        fw.innerHTML=`<div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:4px;">Fotos adjuntas</div>
+          <div class="foto-grid">${s.data().fotos.map(f=>`<img class="foto-mini" src="${f}" style="cursor:pointer;width:110px;height:110px;" onclick="verFoto('${t.idStr}',this.src)">`).join('')}</div>`;
+      }else fw.innerHTML='';
+    }).catch(()=>{fw.innerHTML='';});
+  }else fw.innerHTML='';
+
+  document.getElementById('mt-hist').innerHTML=(t.hist||[]).map(h=>`
+    <div class="hist-row"><div class="hdot"></div><div><div class="htxt">${h.a}</div><div class="hfecha">${h.f} · ${h.u}</div></div></div>`).join('')||'<div class="vacio">Sin historial</div>';
+
+  if(!soloVer){
+    document.getElementById('mt-edit').innerHTML=`
+      <div class="fgrid">
+        <div class="ofg"><label>Estatus</label><select id="e-est"><option ${t.est==='Abierto'?'selected':''}>Abierto</option><option ${t.est==='En gestión'?'selected':''}>En gestión</option><option ${t.est==='Finalizado'?'selected':''}>Finalizado</option></select></div>
+        <div class="ofg"><label>Urgencia</label><select id="e-urg"><option ${t.urg==='Crítica'?'selected':''}>Crítica</option><option ${t.urg==='Alta'?'selected':''}>Alta</option><option ${t.urg==='Media'?'selected':''}>Media</option><option ${t.urg==='Baja'?'selected':''}>Baja</option></select></div>
+        <div class="ofg"><label>Presupuesto (CLP)</label><input type="number" id="e-presu" min="0" step="1000" value="${t.presu||''}" placeholder="Valor de la solución"></div>
+        <div class="ofg"><label>Proveedor</label><input type="text" id="e-prov" value="${t.prov||''}"></div>
+        <div class="ofg"><label>Fecha planificada</label><input type="date" id="e-fplan" value="${t.fplan||''}"></div>
+        <div class="ofg full"><label>Nota de actualización (queda en la bitácora visible para la tienda)</label><textarea id="e-nota" placeholder="Ej: Contacto con proveedor, envío de presupuesto, coordinación de visita..."></textarea></div>
+      </div>
+      <button class="btn btn-p" style="margin-top:.875rem;" onclick="guardarEdit()">Guardar cambios</button>`;
+  }else{document.getElementById('mt-edit').innerHTML='';}
+
+  document.getElementById('mt-acc').innerHTML=soloVer?`<button class="btn btn-s" onclick="cerrar('modal-tkt')">Cerrar</button>`:`
+    <button class="btn ${t.est!=='Finalizado'?'btn-g':'btn-s'}" onclick="cambEst(${t.id},'${t.est!=='Finalizado'?'Finalizado':'Abierto'}');cerrar('modal-tkt');filtrar();">
+      ${t.est!=='Finalizado'?'✓ Marcar finalizado':'↩ Reabrir'}
+    </button>
+    <button class="btn btn-s" onclick="cerrar('modal-tkt')">Cerrar</button>`;
+  // reset tab
+  document.querySelectorAll('#modal-tkt .mtab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#modal-tkt .mtab-p').forEach(x=>x.classList.remove('on'));
+  document.querySelector('#modal-tkt .mtab').classList.add('on');
+  document.getElementById('mt-det').classList.add('on');
+  document.getElementById('modal-tkt').classList.add('on');
+}
+
+function verFoto(idStr,src){
+  document.getElementById('foto-grande').src=src;
+  document.getElementById('modal-foto').classList.add('on');
+}
+
+function guardarEdit(){
+  const t=tickets.find(x=>x.id===editId);if(!t)return;
+  const ne=document.getElementById('e-est').value;
+  const nu=document.getElementById('e-urg').value;
+  const np=document.getElementById('e-prov').value;
+  const nf=document.getElementById('e-fplan').value;
+  const npresu=parseInt(document.getElementById('e-presu').value)||0;
+  const nota=document.getElementById('e-nota').value.trim();
+  const cambios=[];
+  if(ne!==t.est)cambios.push(`Estatus → ${ne}`);
+  if(nu!==t.urg)cambios.push(`Urgencia → ${nu}`);
+  if(np!==(t.prov||''))cambios.push('Proveedor actualizado: '+(np||'—'));
+  if(nf!==(t.fplan||''))cambios.push(`Fecha planificada → ${fmt(nf)}`);
+  if(npresu!==(t.presu||0))cambios.push(npresu>0?`Presupuesto ingresado: ${fmtCLP(npresu)} — Bajo presupuesto`:'Presupuesto retirado — Pendiente de presupuesto');
+  if(nota)cambios.push(`Nota: ${nota}`);
+  if(cambios.length){
+    t.hist.push({f:ts(),a:cambios.join(' · '),u:'operacionestua20'});
+    t.est=ne;t.urg=nu;t.prov=np;t.fplan=nf;t.presu=npresu;
+    saveTickets();cerrar('modal-tkt');filtrar();renderDash();
+    toast('✓ Ticket actualizado');
+  }else{cerrar('modal-tkt');}
+}
+
+function mtab(tab){
+  document.querySelectorAll('#modal-tkt .mtab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('#modal-tkt .mtab-p').forEach(p=>p.classList.remove('on'));
+  document.querySelector(`#modal-tkt .mtab[onclick="mtab('${tab}')"]`).classList.add('on');
+  document.getElementById('mt-'+tab).classList.add('on');
+}
+
+// ============================================================
+// OPS — NUEVO TICKET
+// ============================================================
+function poblarN(){
+  const TD=getTiendas().filter(x=>x.activa!=0);
+  const sel=document.getElementById('n-tienda');if(!sel)return;
+  sel.innerHTML='<option value="">Seleccionar...</option>'+TD.map(t=>`<option value="${t.mail}">${cap(t.t)}</option>`).join('');
+  // Modal tienda: supervisores y zonas
+  const ms=document.getElementById('mt-sup');
+  if(ms)ms.innerHTML='<option value="">Seleccionar...</option>'+SUPERVISORES.map(s=>`<option value="${s}">${cap(s)}</option>`).join('');
+  const mz=document.getElementById('mt-zona');
+  if(mz)mz.innerHTML=ZONAS.map(z=>`<option>${z}</option>`).join('');
+}
+
+function onTiendaSel(){
+  const mail=document.getElementById('n-tienda').value;
+  const t=getTiendas().find(x=>x.mail===mail);
+  document.getElementById('n-zona').value=t?t.z:'';
+  document.getElementById('n-sup').value=t?cap(t.s):'';
+}
+
+function oTipoChange(){
+  const tipo=document.getElementById('n-tipo').value;
+  const sel=document.getElementById('n-gest');
+  const lbl=document.getElementById('n-lbl-gestion');
+  if(tipo==='Cortina metálica falla'){
+    lbl.innerHTML='Causa de la falla <span class="r">*</span>';
+    sel.innerHTML='<option value="">Seleccionar causa...</option>'+CAUSAS_CORTINA.map(c=>`<option>${c}</option>`).join('');
+  }else{
+    lbl.innerHTML='Gestión <span class="r">*</span>';
+    sel.innerHTML='<option value="">Seleccionar...</option>'+GESTIONES.map(g=>`<option>${g}</option>`).join('');
+  }
+  const u=UAUTO[tipo]||'';
+  document.getElementById('n-urg-vista').value=u?`${u} — ${SLA[u].label}`:'';
+}
+
+async function crearTicket(e){
+  e.preventDefault();
+  const mail=document.getElementById('n-tienda').value;
+  const t=getTiendas().find(x=>x.mail===mail);
+  if(!t){alertN('err','Selecciona la tienda.');return;}
+  if(enGarantia(t)){alertN('err','Esta tienda está en garantía: los problemas se gestionan con el supervisor y la constructora, no como ticket.');return;}
+  const tipo=document.getElementById('n-tipo').value;
+  const gest=document.getElementById('n-gest').value;
+  if(!tipo||!gest){alertN('err','Completa tipo y gestión.');return;}
+  const urg=UAUTO[tipo]||'Media';
+  const now=new Date();
+  const fplan=document.getElementById('n-fplan').value;
+  const prov=document.getElementById('n-prov').value;
+  const desc=document.getElementById('n-desc').value;
+
+  const tkt=await crearTicketAtomico(id=>({
+    id,idStr:`TUA-${now.getFullYear()}-${String(id).padStart(4,'0')}`,
+    tienda:t.t,mail:t.mail,sup:t.s,zona:t.z,
+    tipo,gestion:gest,urg,est:'Abierto',
+    mes:now.getMonth()+1,anio:now.getFullYear(),
+    fecha:hoy(),fplan,prov,desc,presu:0,fotos:0,
+    origen:'Manual',
+    hist:[{f:ts(),a:'Ticket creado manualmente por operaciones',u:'operacionestua20'}]
+  }));
+  if(!tkt){alertN('err','No se pudo crear el ticket.');return;}
+  await enviarNotificacion(tkt);
+  alertN('ok',`✓ Ticket ${tkt.idStr} creado — Urgencia ${urg} (${SLA[urg].label}).`);
+  limpiarN();renderDash();
+}
+
+function limpiarN(){
+  document.getElementById('form-nuevo').reset();
+  document.getElementById('n-gest').innerHTML='<option value="">Seleccionar...</option>';
+  document.getElementById('n-urg-vista').value='';
+}
+function alertN(tipo,msg){const el=document.getElementById('al-n');el.className='alerta '+tipo;el.textContent=msg;setTimeout(()=>{el.className='alerta';},5000);}
+
+// ============================================================
+// OPS — IMPORTAR
+// ============================================================
+let pendImp=[];
+function impURL(){
+  const url=document.getElementById('sheet-url').value.trim();
+  if(!url){alertI('err','Ingresa la URL.');return;}
+  const m=url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if(!m){alertI('err','URL no válida.');return;}
+  alertI('ok','Conectando...');
+  fetch(`https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv`)
+    .then(r=>{if(!r.ok)throw new Error();return r.text();})
+    .then(csv=>procCSV(csv))
+    .catch(()=>alertI('err','No se pudo acceder. Usa CSV.'));
+}
+function impArch(){const f=document.getElementById('arch-csv').files[0];if(!f){alertI('err','Selecciona un archivo.');return;}const r=new FileReader();r.onload=e=>procCSV(e.target.result);r.readAsText(f,'UTF-8');}
+function procCSV(txt){
+  const lin=txt.split('\n').filter(l=>l.trim());if(lin.length<2){alertI('err','Sin datos.');return;}
+  const hds=plin(lin[0]);pendImp=[];
+  const TD=getTiendas();
+  for(let i=1;i<lin.length;i++){
+    const cols=plin(lin[i]);if(cols.length<2)continue;
+    const f={};hds.forEach((h,j)=>f[h.trim()]=(cols[j]||'').trim());
+    const nom=f['Tienda']||f['tienda']||'';
+    const mail=(f['Correo']||f['correo']||'').toLowerCase();
+    const td=TD.find(t=>t.mail===mail)||TD.find(t=>t.t.toUpperCase()===nom.toUpperCase())||{t:nom,mail:'',s:'',z:''};
+    const tipo=f['Tipo de Requerimiento']||f['Tipo']||'';
+    pendImp.push({
+      _idx:pendImp.length,
+      tienda:td.t||nom,mail:td.mail,sup:td.s,zona:td.z,
+      tipo,gestion:f['Tipo de Gestión']||f['Gestión']||'Reparación',
+      urg:UAUTO[tipo]||'Media',est:'Abierto',
+      desc:f['Observaciones']||'',
+    });
+  }
+  pendImp=pendImp.filter(x=>x.tienda);
+  if(!pendImp.length){alertI('err','Sin requerimientos válidos.');return;}
+  alertI('ok',`${pendImp.length} tickets detectados.`);
+  document.getElementById('prev-wrap').style.display='block';
+  document.getElementById('prev-n').textContent=pendImp.length;
+  document.getElementById('prev-tabla').innerHTML=`<div class="twrap"><table><thead><tr><th>Tienda</th><th>Supervisor</th><th>Tipo</th><th>Urgencia auto</th></tr></thead><tbody>${pendImp.map(t=>`<tr><td>${cap(t.tienda)}</td><td style="font-size:11px;">${cap(t.sup)}</td><td style="font-size:12px;">${t.tipo}</td><td>${bUrg(t.urg)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function plin(l){const c=[];let cur='';let eq=false;for(const ch of l){if(ch==='"'){eq=!eq;}else if(ch===','&&!eq){c.push(cur);cur='';}else{cur+=ch;}}c.push(cur);return c.map(x=>x.replace(/^"|"$/g,''));}
+async function confImp(){
+  const now=new Date();
+  for(const p of pendImp){
+    await crearTicketAtomico(id=>({
+      id,idStr:`TUA-${now.getFullYear()}-${String(id).padStart(4,'0')}`,
+      tienda:p.tienda,mail:p.mail,sup:p.sup,zona:p.zona,
+      tipo:p.tipo,gestion:p.gestion,urg:p.urg,est:'Abierto',
+      mes:now.getMonth()+1,anio:now.getFullYear(),
+      fecha:hoy(),fplan:'',prov:'',desc:p.desc,presu:0,fotos:0,
+      origen:'Forms',
+      hist:[{f:ts(),a:'Importado desde Forms',u:'operacionestua20'}]
+    }));
+  }
+  pendImp=[];
+  document.getElementById('prev-wrap').style.display='none';
+  alertI('ok','✓ Importación completada.');
+  renderDash();
+}
+function cancImp(){pendImp=[];document.getElementById('prev-wrap').style.display='none';}
+function alertI(tipo,msg){const el=document.getElementById('al-i');el.className='alerta '+tipo;el.textContent=msg;if(tipo==='ok')setTimeout(()=>{if(el.textContent===msg)el.className='alerta';},6000);}
+
+// ============================================================
+// OPS — REPORTES
+// ============================================================
+function renderRep(){
+  const base=visTickets();
+  const sups={};
+  base.forEach(t=>{const k=(t.sup||'—').toUpperCase();if(!sups[k])sups[k]={total:0,ab:0,eg:0,fi:0,venc:0};sups[k].total++;if(t.est==='Abierto')sups[k].ab++;else if(t.est==='En gestión')sups[k].eg++;else sups[k].fi++;if(slaTicket(t).estado==='venc')sups[k].venc++;});
+  document.getElementById('rep-sups').innerHTML=`<div class="twrap"><table><thead><tr><th>Supervisor</th><th>Total</th><th>Abiertos</th><th>En gestión</th><th>Finalizados</th><th>Fuera de plazo</th></tr></thead><tbody>${Object.entries(sups).map(([s,v])=>`<tr><td style="font-weight:600;">${cap(s)}</td><td style="font-weight:700;">${v.total}</td><td>${v.ab}</td><td>${v.eg}</td><td>${v.fi}</td><td style="color:${v.venc?'var(--vc)':'var(--bc)'};font-weight:700;">${v.venc}</td></tr>`).join('')}</tbody></table></div>`;
+
+  const TD=getTiendas().filter(t=>t.activa!=0&&(!esSup()||t.s===supNombre()));
+  const con=new Set(base.map(t=>t.mail||t.tienda));
+  const conT=TD.filter(t=>con.has(t.mail)||con.has(t.t));
+  const sinT=TD.filter(t=>!con.has(t.mail)&&!con.has(t.t));
+  const pct=TD.length?Math.round(conT.length/TD.length*100):0;
+  document.getElementById('rep-participacion').innerHTML=`
+    <div style="display:flex;gap:12px;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="background:var(--bs);border:1px solid var(--bb);border-radius:var(--r2);padding:10px 16px;flex:1;min-width:130px;"><div style="font-size:10px;text-transform:uppercase;color:var(--bc);margin-bottom:4px;">Con tickets</div><div style="font-size:24px;font-weight:700;color:var(--bc);">${conT.length}</div></div>
+      <div style="background:var(--rojo-s);border:1px solid var(--rojo-b);border-radius:var(--r2);padding:10px 16px;flex:1;min-width:130px;"><div style="font-size:10px;text-transform:uppercase;color:var(--rojo);margin-bottom:4px;">Sin tickets</div><div style="font-size:24px;font-weight:700;color:var(--rojo);">${sinT.length}</div></div>
+      <div style="background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:10px 16px;flex:1;min-width:130px;"><div style="font-size:10px;text-transform:uppercase;color:var(--txt3);margin-bottom:4px;">Participación</div><div style="font-size:24px;font-weight:700;">${pct}%</div></div>
+    </div>
+    ${sinT.length?`<details><summary style="font-size:12px;font-weight:700;color:var(--rojo);cursor:pointer;">Ver ${sinT.length} tiendas sin tickets</summary>
+      <div class="twrap" style="margin-top:8px;"><table><thead><tr><th>Tienda</th><th>Supervisor</th><th>Zona</th></tr></thead><tbody>${sinT.map(t=>`<tr><td style="font-size:12px;font-weight:600;">${cap(t.t)}</td><td style="font-size:12px;">${cap(t.s)}</td><td>${bZona(t.z)}</td></tr>`).join('')}</tbody></table></div></details>`:'<div style="font-size:13px;color:var(--bc);">✅ Todas las tiendas han ingresado tickets.</div>'}`;
+}
+
+function buildXL(L,nom){
+  const wb=XLSX.utils.book_new();
+  const h=[['ID','Tienda','Correo','Supervisor','Zona','Tipo','Gestión','Urgencia','SLA días','SLA máx','SLA estado','Presupuesto','Estatus','Origen','Fecha','Fecha plan.','Proveedor','Descripción']];
+  L.forEach(t=>{const s=slaTicket(t);h.push([t.idStr,cap(t.tienda),t.mail||'',cap(t.sup),t.zona,t.tipo,t.gestion,t.urg,s.dias,s.max,s.estado==='venc'?'VENCIDO':s.estado==='warn'?'Por vencer':s.estado==='fin'?'Finalizado':'En plazo',t.presu||0,t.est,t.origen,t.fecha,t.fplan||'',t.prov||'',t.desc||'']);});
+  const ws=XLSX.utils.aoa_to_sheet(h);
+  ws['!cols']=h[0].map(()=>({wch:16}));
+  XLSX.utils.book_append_sheet(wb,ws,'Tickets');
+  const h2=[['ID','Tienda','Acción','Fecha','Usuario']];
+  L.forEach(t=>(t.hist||[]).forEach(x=>h2.push([t.idStr,cap(t.tienda),x.a,x.f,x.u])));
+  const ws2=XLSX.utils.aoa_to_sheet(h2);
+  ws2['!cols']=[{wch:15},{wch:28},{wch:50},{wch:18},{wch:24}];
+  XLSX.utils.book_append_sheet(wb,ws2,'Historial');
+  XLSX.writeFile(wb,nom);
+}
+function exportAll(){buildXL(visTickets(),`Tickets_TUA_${hoy()}.xlsx`);}
+function exportPend(){buildXL(visTickets().filter(t=>t.est!=='Finalizado'),`Tickets_TUA_Pendientes_${hoy()}.xlsx`);}
+function exportVenc(){buildXL(visTickets().filter(t=>slaTicket(t).estado==='venc'),`Tickets_TUA_FueraPlazo_${hoy()}.xlsx`);}
+
+// ============================================================
+// OPS — CONFIG
+// ============================================================
+function renderCfg(){
+  const e=getEJS();
+  document.getElementById('cfg-sid').value=e.sid;
+  document.getElementById('cfg-tid').value=e.tid;
+  document.getElementById('cfg-pk').value=e.pk;
+  document.getElementById('ejs-status').innerHTML=ejsActivo()
+    ?`<div class="alerta ok" style="display:block;margin-bottom:1rem;">✅ Notificaciones activas</div>`
+    :`<div class="ejs-banner"><strong>⚠️ Notificaciones no configuradas</strong>Completa los campos de EmailJS.</div>`;
+  // Supervisores
+  document.getElementById('lista-sups-cfg').innerHTML=SUPERVISORES.map(s=>`
+    <div class="tienda-cfg-row">
+      <div class="tienda-cfg-info"><div class="tienda-cfg-nom">${cap(s)}</div><div class="tienda-cfg-sub">Acceso de solo lectura a sus tiendas</div></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:10px;color:var(--txt3);">Clave:</span>
+        <input type="text" class="tienda-cfg-pass" value="${passSupsCache[s]||''}" id="sp-${s.replace(/\s/g,'_')}">
+        <button class="btn btn-g btn-sm" onclick="guardarPassSup('${s}')">✓</button>
+      </div>
+    </div>`).join('');
+  renderListaTiendas();
+}
+
+async function guardarPassSup(nombre){
+  const v=document.getElementById('sp-'+nombre.replace(/\s/g,'_'))?.value.trim();
+  if(!v){toast('La contraseña no puede estar vacía.');return;}
+  await setPassSup(nombre,v);
+  toast(`✓ Contraseña de ${cap(nombre)} actualizada`);
+}
+
+async function guardarEJS(){
+  const sid=document.getElementById('cfg-sid').value.trim();
+  const tid=document.getElementById('cfg-tid').value.trim();
+  const pk=document.getElementById('cfg-pk').value.trim();
+  if(!sid||!tid||!pk){toast('Completa los tres campos.');return;}
+  await setEJS(sid,tid,pk);
+  toast('✓ Configuración de correo guardada');renderCfg();
+}
+async function testEJS(){
+  if(!ejsActivo()){toast('Primero guarda la configuración.');return;}
+  const e=getEJS();emailjs.init(e.pk);
+  try{
+    await Promise.all(CORREOS_NOTIF.map(c=>emailjs.send(e.sid,e.tid,{subject:'[TEST] TUA Operaciones',mensaje:`Correo de prueba.\nFecha: ${ts()}`,to_email:c})));
+    toast('✅ Correos de prueba enviados');
+  }catch(err){toast('❌ Error al enviar. Verifica los datos.');}
+}
+async function cambiarPassOps(){
+  const v=document.getElementById('cfg-pass-o').value.trim();
+  if(!v){toast('Ingresa una contraseña.');return;}
+  await setPassOps(v);
+  document.getElementById('cfg-pass-o').value='';
+  toast('✓ Contraseña de operaciones actualizada');
+}
+
+function renderListaTiendas(){
+  const bus=(document.getElementById('cfg-buscar-tienda')?.value||'').toLowerCase();
+  const TD=getTiendas();
+  document.getElementById('cfg-n-tiendas').textContent=TD.filter(t=>t.activa!=0).length+' activas de '+TD.length;
+  const lista=TD.map((t,i)=>({...t,_i:i})).filter(t=>!bus||t.t.toLowerCase().includes(bus)||t.mail.includes(bus));
+  document.getElementById('lista-tiendas-cfg').innerHTML=lista.map(t=>{
+    const gar=enGarantia(t);
+    return `<div class="tienda-cfg-row" style="${!t.activa?'opacity:.5;':''}">
+      <div class="tienda-cfg-info">
+        <div class="tienda-cfg-nom">${cap(t.t)} ${gar?'<span class="badge" style="background:var(--as);color:var(--ac);border:1px solid var(--ab);">🛡️ Garantía</span>':''} ${!t.activa?'<span class="badge" style="background:#f0f0f0;color:#999;">Inactiva</span>':''}</div>
+        <div class="tienda-cfg-sub">${t.mail} · ${cap(t.s)} · ${t.z}${t.apertura&&t.apertura!=='PROXIMA'?' · Apertura '+fmt(t.apertura):t.apertura==='PROXIMA'?' · Próxima apertura':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+        <input type="text" class="tienda-cfg-pass" value="${t.pass||''}" id="tp-${t._i}">
+        <button class="btn btn-g btn-sm" onclick="guardarPassTienda(${t._i})">✓</button>
+        <button class="btn btn-s btn-sm" onclick="editarTienda(${t._i})">✎</button>
+        <button class="btn btn-sm" style="background:${t.activa?'#fff3f3':'#f0fff4'};color:${t.activa?'var(--rojo)':'var(--bc)'};border:1px solid ${t.activa?'var(--rojo-b)':'var(--bb)'};" onclick="toggleTienda(${t._i})">${t.activa?'Desact.':'Activar'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function guardarPassTienda(i){
+  const TD=getTiendas();
+  const v=document.getElementById('tp-'+i)?.value.trim();
+  if(!v){toast('La contraseña no puede estar vacía.');return;}
+  TD[i].pass=v;saveTiendas(TD);
+  toast(`✓ Contraseña actualizada para ${cap(TD[i].t)}`);
+}
+function toggleTienda(i){
+  const TD=getTiendas();
+  TD[i].activa=TD[i].activa?0:1;
+  saveTiendas(TD);poblarN();renderListaTiendas();
+  toast(`Tienda ${TD[i].activa?'activada':'desactivada'}`);
+}
+function editarTienda(i){
+  tiendaEditIdx=i;
+  const t=getTiendas()[i];
+  document.getElementById('mt-tit-tienda').textContent='Editar tienda';
+  document.getElementById('mt-nom').value=t.t;
+  document.getElementById('mt-mail').value=t.mail||'';
+  document.getElementById('mt-sup').value=t.s||'';
+  document.getElementById('mt-zona').value=t.z||ZONAS[0];
+  document.getElementById('mt-apertura').value=(t.apertura&&t.apertura!=='PROXIMA')?t.apertura:'';
+  document.getElementById('mt-pass').value=t.pass||'';
+  document.getElementById('mt-activa').value=t.activa!=0?'1':'0';
+  document.getElementById('modal-tienda').classList.add('on');
+}
+function abrirModalTienda(){
+  tiendaEditIdx=null;
+  document.getElementById('mt-tit-tienda').textContent='Agregar tienda';
+  ['mt-nom','mt-mail','mt-pass','mt-apertura'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mt-sup').value='';
+  document.getElementById('mt-zona').value=ZONAS[0];
+  document.getElementById('mt-activa').value='1';
+  document.getElementById('modal-tienda').classList.add('on');
+}
+function guardarTienda(){
+  const nom=document.getElementById('mt-nom').value.trim();
+  const mail=document.getElementById('mt-mail').value.trim().toLowerCase();
+  const sup=document.getElementById('mt-sup').value;
+  const zona=document.getElementById('mt-zona').value;
+  const apertura=document.getElementById('mt-apertura').value;
+  let pass=document.getElementById('mt-pass').value.trim();
+  const activa=document.getElementById('mt-activa').value==='1'?1:0;
+  if(!nom){toast('El nombre es obligatorio.');return;}
+  if(!mail||!mail.includes('@')){toast('Ingresa un correo válido.');return;}
+  if(!pass)pass=mail.split('@')[0].slice(0,5)+'2026';
+  const TD=getTiendas();
+  if(tiendaEditIdx===null){
+    if(TD.find(x=>x.mail===mail)){toast('Ya existe una tienda con ese correo.');return;}
+    TD.push({t:nom,mail,s:sup,z:zona,apertura,pass,activa});
+    toast(`✓ Tienda ${cap(nom)} agregada`);
+  }else{
+    TD[tiendaEditIdx]={...TD[tiendaEditIdx],t:nom,mail,s:sup,z:zona,apertura,pass,activa};
+    toast(`✓ Tienda ${cap(nom)} actualizada`);
+  }
+  saveTiendas(TD);poblarN();renderListaTiendas();cerrar('modal-tienda');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload=()=>{
+  document.getElementById('login').style.display='none';
+  document.getElementById('fb-loading').style.display='flex';
+  iniciarSyncFirestore(()=>{
+    document.getElementById('fb-loading').style.display='none';
+    poblarLoginSups();
+    if(sesion==='ops'||esSup()){mostrarOps();}
+    else if(sesion){
+      const t=getTiendas().find(x=>x.mail===sesion&&x.activa!=0);
+      if(t)mostrarTienda(sesion);
+      else{sesion='';localStorage.removeItem('ses4_tua');document.getElementById('login').style.display='flex';}
+    }
+    else{document.getElementById('login').style.display='flex';}
+  });
+  document.querySelectorAll('.overlay').forEach(m=>{
+    m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on');});
+  });
+  const td=document.getElementById('t-desc');
+  if(td)td.addEventListener('input',tPaso);
+};
+</script>
+</body>
+</html>
